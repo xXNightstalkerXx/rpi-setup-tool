@@ -1,10 +1,30 @@
 #! /bin/bash
 
-#Directory Declarations
-start_dir=$PWD
-temp_dir=/tmp/downloads
-install_dir=/etc/uctronics
-scripts_dir=/usr/bin
+#General Directory Declarations
+START_DIR=$PWD
+INSTALL_DIR=/etc/uctronics
+UC_INSTALLER_DIR=/etc/uctronics/uctronics-lcd-installer
+UC_REPO_DIR=/etc/uctronics/SKU_RM0004
+UC_BAK_DIR=/etc/uctronics/backup
+SCRIPTS_DIR=/usr/bin
+CONFIG=/boot/config.txt
+CONFIG_BAK=/etc/uctronics/backup/config.txt.bak
+MODULES=/etc/modules
+MODULES_BAK=/etc/uctronics/backup/modules.bak
+UNINSTALL=/usr/bin/uctronics-lcd-uninstaller
+UNINSTALL_BAK=/etc/uctronics/uctronics-lcd-installer/uctronics-lcd-uninstaller
+STARTUP=/usr/bin/uctronics-lcd-startup
+STARTUP_BAK=/etc/uctronics/uctronics-lcd-installer/uctronics-lcd-startup
+SYSTEMD=/etc/systemd/system/uctronics-lcd.service
+SYSTEMD_BAK=/etc/uctronics/uctronics-lcd-installer/uctronics-lcd.service
+
+#URL Declarations
+UC_GIT_URL=https://github.com/UCTRONICS/SKU_RM0004.git
+INSTALLER_GIT_URL=https://github.com/xXNightstalkerXx/uctronics-lcd-installer.git
+INSTALLER_WGET_URL=https://raw.github.com/xXNightstalkerXx/uctronics-lcd-installer/master/uctronics-lcd-installer
+
+#I2C Interface Setting
+I2C_SETTING=on
 
 #Color Declarations
 std=`tput setaf 15`
@@ -33,41 +53,55 @@ os_type=${os_type#*=}
 
 if [[ "$os_type" == *"Kali"* ]]
 then
-		install_options=1
-		echo ""
-		echo "$os_type"
+	INSTALL_OPTIONS=1
+	echo ""
+	echo "$os_type"
 elif [[ "$os_type" == *"Raspbian"* ]]
 then
-		if [[ $(cat /boot/issue.txt) == *"stage2"* ]]
-		then
-				install_options=2
-				echo ""
-				echo "$os_type"
-				echo " Lite Version"
-		elif [[ $(cat /boot/issue.txt) == *"stage4"* ]]
-		then
-				install_options=3
-				echo ""
-				echo "$os_type"
-				echo " GUI Lite Version"
-		elif [[ $(cat /boot/issue.txt) == *"stage5"* ]]
-		then
-				install_options=3
-				echo ""
-				echo "$os_type"
-				echo " GUI Full Version"
-		else
-				install_options=2
-				echo ""
-				echo "$os_type"
-				echo " Unknown Raspbian"
-				echo " Using Lite Version Install Options!"
-		fi
-else
+	if [[ $(cat /boot/issue.txt) == *"stage2"* ]]
+	then
+		INSTALL_OPTIONS=2
 		echo ""
-		echo "${red}Wrong Operating System detected! Aborting the Installation!${std}"
-		sleep 1
-		exit 1
+		echo "$os_type"
+		echo " Lite Version"
+	elif [[ $(cat /boot/issue.txt) == *"stage4"* ]]
+	then
+		INSTALL_OPTIONS=3
+		echo ""
+		echo "$os_type"
+		echo " GUI Lite Version"
+	elif [[ $(cat /boot/issue.txt) == *"stage5"* ]]
+	then
+		INSTALL_OPTIONS=3
+		echo ""
+		echo "$os_type"
+		echo " GUI Full Version"
+	else
+		INSTALL_OPTIONS=2
+		echo ""
+		echo "$os_type"
+		echo " Unknown Raspbian"
+		echo " Using Lite Version Install Options!"
+	fi
+else
+	echo ""
+	echo "${red}Wrong Operating System detected! Aborting the Installation!${std}"
+	sleep 1
+	exit 1
+fi
+
+if [[ $INSTALL_OPTIONS -eq 1 ]]
+then
+	#OS Specific Directory Declarations
+	BLACKLIST=/etc/modprobe.d/kalipi-blacklist.conf
+elif [[ $INSTALL_OPTIONS -eq 2 ]]
+then
+	#OS Specific Directory Declarations
+	BLACKLIST=/etc/modprobe.d/raspi-blacklist.conf
+elif [[ $INSTALL_OPTIONS -eq 3 ]]
+then
+	#OS Specific Directory Declarations
+	BLACKLIST=/etc/modprobe.d/raspi-blacklist.conf
 fi
 
 echo ""
@@ -76,7 +110,41 @@ sleep 1
 
 echo ""
 echo ""
-echo "${blue}Calculating your possible Packet Options...${std}"
+echo "${blue}Updating Repository List...${std}"
 
-if [[ $install_options -eq 1 ]]
+sudo apt-get update
+
+echo ""
+echo "${blue}Repository List updated! Continuing Installation!${std}"
+sleep 1
+
+echo ""
+echo ""
+echo "${green}It is highly recommended to update your OS before Installation!${std}"
+echo "${green}Do you want to update your OS?${std}"
+
+echo ""
+read -p "${green}Yes (y)/ No (n): ${std}" n;
+
+while ! [[ "$n" =~ ^(y|n)$ ]];
+do
+        echo ""
+        echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        read -p "Yes (y)/ No (n): " n;
+done
+
+if [[ "$n" =~ ^(y)$ ]];
 then
+        echo ""
+        echo "${blue}Updating the OS now...${std}"
+
+	sudo apt-get upgrade -y
+
+        echo ""
+        echo "${blue}Operating System updated successfully! Continuing the Installation!${std}"
+        sleep 1
+else
+        echo ""
+        echo "${red}Not updating your OS! Installation might fail!${std}"
+	sleep 1
+fi
