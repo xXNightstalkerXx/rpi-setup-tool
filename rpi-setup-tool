@@ -46,13 +46,13 @@ echo ""
 echo "${green}It is highly recommended to update your OS before Installation!${std}"
 echo "${green}Do you want to update your OS?${std}"
 echo ""
-read -p "${green}Yes (y)/ No (n): ${std}" n;
+read -r -p "${green}Yes (y)/ No (n): ${std}" n;
 
 while ! [[ "$n" =~ ^(y|n)$ ]];
 do
         echo ""
         echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
-        read -p "Yes (y)/ No (n): " n;
+        read -r -p "Yes (y)/ No (n): " n;
 done
 
 if [[ "$n" =~ ^(y)$ ]];
