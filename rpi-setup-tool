@@ -2,29 +2,17 @@
 
 #General Directory Declarations
 START_DIR=$PWD
-INSTALL_DIR=/etc/uctronics
-UC_INSTALLER_DIR=/etc/uctronics/uctronics-lcd-installer
-UC_REPO_DIR=/etc/uctronics/SKU_RM0004
-UC_BAK_DIR=/etc/uctronics/backup
+TEMP_DIR=/etc/uctronics
 SCRIPTS_DIR=/usr/bin
 CONFIG=/boot/config.txt
-CONFIG_BAK=/etc/uctronics/backup/config.txt.bak
 MODULES=/etc/modules
-MODULES_BAK=/etc/uctronics/backup/modules.bak
-UNINSTALL=/usr/bin/uctronics-lcd-uninstaller
-UNINSTALL_BAK=/etc/uctronics/uctronics-lcd-installer/uctronics-lcd-uninstaller
-STARTUP=/usr/bin/uctronics-lcd-startup
-STARTUP_BAK=/etc/uctronics/uctronics-lcd-installer/uctronics-lcd-startup
-SYSTEMD=/etc/systemd/system/uctronics-lcd.service
-SYSTEMD_BAK=/etc/uctronics/uctronics-lcd-installer/uctronics-lcd.service
 
-#URL Declarations
-UC_GIT_URL=https://github.com/UCTRONICS/SKU_RM0004.git
-INSTALLER_GIT_URL=https://github.com/xXNightstalkerXx/uctronics-lcd-installer.git
-INSTALLER_WGET_URL=https://raw.github.com/xXNightstalkerXx/uctronics-lcd-installer/master/uctronics-lcd-installer
-
-#I2C Interface Setting
-I2C_SETTING=on
+#WGET URL Declarations
+WGET_KALIVNC=https://raw.githubusercontent.com/xXNightstalkerXx/rpi-kalivnc-installer/master/rpi-kalivnc-installer
+WGET_EEPROM=https://raw.githubusercontent.com/xXNightstalkerXx/rpi-eeprom-flasher/master/rpi-eeprom-installer
+WGET_UCLCD=https://raw.githubusercontent.com/xXNightstalkerXx/uctronics-lcd-installer/master/uctronics-lcd-installer
+WGET_NETDRIVE=https://raw.githubusercontent.com/xXNightstalkerXx/netdrive-connector/master/netdrive-connector
+WGET_PISHRINK=https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh
 
 #Color Declarations
 std=$(tput setaf 15)
@@ -59,26 +47,26 @@ if [[ "$n" =~ ^(y)$ ]];
 then
         echo ""
         echo "${blue}Updating the OS now...${std}"
-	sudo apt-get upgrade -y
+		sudo apt-get upgrade -y
         echo ""
         echo "${blue}Operating System updated successfully! Continuing the Installation!${std}"
         sleep 1
 else
         echo ""
         echo "${red}Not updating your OS! Installation might fail!${std}"
-	sleep 1
+		sleep 1
 fi
 
 echo ""
 echo ""
-echo "${blue}      ////////////  ////////////  //////   ////////////  ////////////${std}"
-echo "${blue}     //                 //       //   //       //       //          ${std}"
-echo "${blue}    //                 //       //    //      //       //          ${std}"
-echo "${blue}   ////////////       //       /////////     //       ////////////${std}"
-echo "${blue}            //       //       //      //    //                 //${std}"
-echo "${blue}           //       //       //       //   //                 //${std}"
-echo "${blue}////////////       //       //        //  //       ////////////${std}"
-echo "UCTronics Status LCD Installer by Nightstalker"
+echo "${blue}      ///////////   ///////////   //      ///////////   ///////////  ////////////  //       //  ///////////${std}"
+echo "${blue}     //       //   //       //   //      //            //                //       //       //  //       //${std}"
+echo "${blue}    //       //   //       //   //      //            //                //       //       //  //       //${std}"
+echo "${blue}   ///////////   ///////////   //      ///////////   ///////////       //       //       //  ///////////${std}"
+echo "${blue}  // \\\        //            //               //   //                //       //       //  //${std}"
+echo "${blue} //   \\\      //            //               //   //                //       //       //  //${std}"
+echo "${blue}//     \\\    //            //      ///////////   ///////////       //       ///////////  //${std}"
+echo "RPI Setup Tool by Nightstalker"
 echo ""
 echo ""
 echo "${blue}Checking OS...${std}"
@@ -141,4 +129,3 @@ fi
 echo ""
 echo "${blue}Operating System okay! Continuing the Installation!${std}"
 sleep 1
-
