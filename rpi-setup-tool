@@ -142,7 +142,7 @@ set_standard_packages () {
 select_custom_packages () {
 	echo ""
 	echo ""
-	echo "${blue}Please select the packages you want to install!"
+	echo "${blue}Please select the packages you want to install!${std}"
 
 	if $EEPROM_UPDATE
 	then
@@ -152,17 +152,17 @@ select_custom_packages () {
 
 		while ! [[ "$n" =~ ^(y|n)$ ]];
 		do
-        	echo ""
-        	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
-        	read -r -p "Yes (y)/ No (n): " n;
+        		echo ""
+        		echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        		read -r -p "Yes (y)/ No (n): " n;
 		done
 
 		if [[ "$n" =~ ^(y)$ ]];
 		then
-        	EEPROM_UPDATE=True
+        		EEPROM_UPDATE=True
 			USED_PACKAGE_ARRAY+=("Update EEPROM")
 		else
-        	EEPROM_UPDATE=False
+        		EEPROM_UPDATE=False
 			UNUSED_PACKAGE_ARRAY+=("Update EEPROM")
 		fi
 	fi
@@ -175,17 +175,17 @@ select_custom_packages () {
 
 		while ! [[ "$n" =~ ^(y|n)$ ]];
 		do
-        	echo ""
-        	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
-        	read -r -p "Yes (y)/ No (n): " n;
+        		echo ""
+        		echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        		read -r -p "Yes (y)/ No (n): " n;
 		done
 
 		if [[ "$n" =~ ^(y)$ ]];
 		then
-        	KALIVNC=True
+        		KALIVNC=True
 			USED_PACKAGE_ARRAY+=("Kali VNC")
 		else
-        	KALIVNC=False
+        		KALIVNC=False
 			UNUSED_PACKAGE_ARRAY+=("Kali VNC")
 		fi
 	fi
@@ -198,17 +198,17 @@ select_custom_packages () {
 
 		while ! [[ "$n" =~ ^(y|n)$ ]];
 		do
-        	echo ""
-        	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
-        	read -r -p "Yes (y)/ No (n): " n;
+        		echo ""
+        		echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        		read -r -p "Yes (y)/ No (n): " n;
 		done
 
 		if [[ "$n" =~ ^(y)$ ]];
 		then
-        	UCLCD=True
+        		UCLCD=True
 			USED_PACKAGE_ARRAY+=("UCTronics LCD")
 		else
-        	UCLCD=False
+        		UCLCD=False
 			UNUSED_PACKAGE_ARRAY+=("UCTronics LCD")
 		fi
 	fi
@@ -221,17 +221,17 @@ select_custom_packages () {
 
 		while ! [[ "$n" =~ ^(y|n)$ ]];
 		do
-        	echo ""
-        	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
-        	read -r -p "Yes (y)/ No (n): " n;
+        		echo ""
+        		echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        		read -r -p "Yes (y)/ No (n): " n;
 		done
 
 		if [[ "$n" =~ ^(y)$ ]];
 		then
-        	NETDRIVE=True
+        		NETDRIVE=True
 			USED_PACKAGE_ARRAY+=("Netdrive Connector")
 		else
-        	NETDRIVE=False
+        		NETDRIVE=False
 			UNUSED_PACKAGE_ARRAY+=("Netdrive Connector")
 		fi
 	fi
@@ -244,17 +244,17 @@ select_custom_packages () {
 
 		while ! [[ "$n" =~ ^(y|n)$ ]];
 		do
-        	echo ""
-        	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
-        	read -r -p "Yes (y)/ No (n): " n;
+        		echo ""
+        		echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        		read -r -p "Yes (y)/ No (n): " n;
 		done
 
 		if [[ "$n" =~ ^(y)$ ]];
 		then
-        	EEPROM_FLASHER=True
+        		EEPROM_FLASHER=True
 			USED_PACKAGE_ARRAY+=("EEPROM Flasher")
 		else
-        	EEPROM_FLASHER=False
+        		EEPROM_FLASHER=False
 			UNUSED_PACKAGE_ARRAY+=("EEPROM Flasher")
 		fi
 	fi
@@ -267,17 +267,17 @@ select_custom_packages () {
 
 		while ! [[ "$n" =~ ^(y|n)$ ]];
 		do
-        	echo ""
-        	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
-        	read -r -p "Yes (y)/ No (n): " n;
+        		echo ""
+        		echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        		read -r -p "Yes (y)/ No (n): " n;
 		done
 
 		if [[ "$n" =~ ^(y)$ ]];
 		then
-        	PISHRINK=True
+        		PISHRINK=True
 			USED_PACKAGE_ARRAY+=("Pishrink")
 		else
-        	PISHRINK=False
+        		PISHRINK=False
 			UNUSED_PACKAGE_ARRAY+=("Pishrink")
 		fi
 	fi
@@ -290,17 +290,17 @@ select_custom_packages () {
 
 		while ! [[ "$n" =~ ^(y|n)$ ]];
 		do
-        	echo ""
-        	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
-        	read -r -p "Yes (y)/ No (n): " n;
+        		echo ""
+        		echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        		read -r -p "Yes (y)/ No (n): " n;
 		done
 
 		if [[ "$n" =~ ^(y)$ ]];
 		then
-        	SAMBA=True
+        		SAMBA=True
 			USED_PACKAGE_ARRAY+=("Samba")
 		else
-        	SAMBA=False
+        		SAMBA=False
 			UNUSED_PACKAGE_ARRAY+=("Samba")
 		fi
 	fi
@@ -313,17 +313,17 @@ select_custom_packages () {
 
 		while ! [[ "$n" =~ ^(y|n)$ ]];
 		do
-        	echo ""
-        	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
-        	read -r -p "Yes (y)/ No (n): " n;
+        		echo ""
+        		echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        		read -r -p "Yes (y)/ No (n): " n;
 		done
 
 		if [[ "$n" =~ ^(y)$ ]];
 		then
-        	GPARTED=True
+        		GPARTED=True
 			USED_PACKAGE_ARRAY+=("GParted")
 		else
-        	GPARTED=False
+        		GPARTED=False
 			UNUSED_PACKAGE_ARRAY+=("GParted")
 		fi
 	fi
@@ -336,17 +336,17 @@ select_custom_packages () {
 
 		while ! [[ "$n" =~ ^(y|n)$ ]];
 		do
-        	echo ""
-        	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
-        	read -r -p "Yes (y)/ No (n): " n;
+        		echo ""
+        		echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        		read -r -p "Yes (y)/ No (n): " n;
 		done
 
 		if [[ "$n" =~ ^(y)$ ]];
 		then
-        	RPIIMAGER=True
+        		RPIIMAGER=True
 			USED_PACKAGE_ARRAY+=("RPI Imager")
 		else
-        	RPIIMAGER=False
+        		RPIIMAGER=False
 			UNUSED_PACKAGE_ARRAY+=("RPI Imager")
 		fi
 	fi
@@ -359,17 +359,17 @@ select_custom_packages () {
 
 		while ! [[ "$n" =~ ^(y|n)$ ]];
 		do
-        	echo ""
-        	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
-        	read -r -p "Yes (y)/ No (n): " n;
+        		echo ""
+        		echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        		read -r -p "Yes (y)/ No (n): " n;
 		done
 
 		if [[ "$n" =~ ^(y)$ ]];
 		then
-        	NO_WIFI=True
+        		NO_WIFI=True
 			USED_PACKAGE_ARRAY+=("Disable WIFI")
 		else
-        	NO_WIFI=False
+        		NO_WIFI=False
 			UNUSED_PACKAGE_ARRAY+=("Disable WIFI")
 		fi
 	fi
@@ -382,17 +382,17 @@ select_custom_packages () {
 
 		while ! [[ "$n" =~ ^(y|n)$ ]];
 		do
-        	echo ""
-        	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
-        	read -r -p "Yes (y)/ No (n): " n;
+        		echo ""
+        		echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        		read -r -p "Yes (y)/ No (n): " n;
 		done
 
 		if [[ "$n" =~ ^(y)$ ]];
 		then
-        	MNT_NAS=True
+        		MNT_NAS=True
 			USED_PACKAGE_ARRAY+=("Mount NAS")
 		else
-        	MNT_NAS=False
+        		MNT_NAS=False
 			UNUSED_PACKAGE_ARRAY+=("Mount NAS")
 		fi
 	fi
@@ -406,7 +406,7 @@ show_packages_to_install () {
 
 	for i in "${USED_PACKAGE_ARRAY[@]}" 
 	do
-        printf "%s\n" "${i}"
+        	printf "%s\n" "${i}"
 	done
 
 	if ! [[ ${#UNUSED_PACKAGE_ARRAY[@]} -eq 0 ]]
@@ -417,7 +417,7 @@ show_packages_to_install () {
 
 		for i in "${UNUSED_PACKAGE_ARRAY[@]}"
 		do
-        	printf "%s\n" "${i}"
+        		printf "%s\n" "${i}"
 		done
 	else
 		echo ""
@@ -459,7 +459,7 @@ then
 else
         echo ""
         echo "${red}Not updating your OS! Installation might fail!${std}"
-		sleep 1
+	sleep 1
 fi
 
 
@@ -572,28 +572,28 @@ then
 
 	while ! [[ "$n" =~ ^(y|n)$ ]];
 	do
-    	echo ""
-        echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
-        read -r -p "Yes (y)/ No (n): " n;
+    		echo ""
+        	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        	read -r -p "Yes (y)/ No (n): " n;
 	done
 
 	if [[ "$n" =~ ^(y)$ ]];
 	then
 		while ! [[ "$n" =~ ^(n)$ ]];
 		do
-        	clear_arrays
+        		clear_arrays
 			set_possible_packages
 			select_custom_packages
-    		show_packages_to_install
+    			show_packages_to_install
 			echo ""
 			echo "${green}Do you want to change something?${std}"
 			read -r -p "Yes (y)/ No (n): " n;
 
 			while ! [[ "$n" =~ ^(y|n)$ ]];
 			do
-    			echo ""
-        		echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
-        		read -r -p "Yes (y)/ No (n): " n;
+    				echo ""
+        			echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        			read -r -p "Yes (y)/ No (n): " n;
 			done
 		done
 	fi
@@ -601,19 +601,19 @@ else
 	n="y"
 	while ! [[ "$n" =~ ^(n)$ ]];
 	do
-        clear_arrays
+        	clear_arrays
 		set_possible_packages
 		select_custom_packages
-    	show_packages_to_install
+    		show_packages_to_install
 		echo ""
 		echo "${green}Do you want to change something?${std}"
 		read -r -p "Yes (y)/ No (n): " n;
 
 		while ! [[ "$n" =~ ^(y|n)$ ]];
 		do
-    		echo ""
-        	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
-        	read -r -p "Yes (y)/ No (n): " n;
+    			echo ""
+        		echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        		read -r -p "Yes (y)/ No (n): " n;
 		done
 	done
 fi
