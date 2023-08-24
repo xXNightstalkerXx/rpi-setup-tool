@@ -2,15 +2,15 @@
 
 #General Directory Declarations
 START_DIR=$PWD
-TEMP_DIR=/etc/uctronics
+TEMP_DIR=/tmp/downloads
 SCRIPTS_DIR=/usr/bin
 CONFIG=/boot/config.txt
 MODULES=/etc/modules
 
 #WGET URL Declarations
-WGET_KALIVNC=https://raw.githubusercontent.com/xXNightstalkerXx/rpi-kalivnc-installer/master/rpi-kalivnc-installer
-WGET_EEPROM=https://raw.githubusercontent.com/xXNightstalkerXx/rpi-eeprom-flasher/master/rpi-eeprom-installer
-WGET_UCLCD=https://raw.githubusercontent.com/xXNightstalkerXx/uctronics-lcd-installer/master/uctronics-lcd-installer
+WGET_KALIVNC=https://raw.githubusercontent.com/xXNightstalkerXx/rpi-kalivnc-installer/master/rpi-kalivnc-autoinstaller
+WGET_EEPROM=https://raw.githubusercontent.com/xXNightstalkerXx/rpi-eeprom-flasher/master/rpi-eeprom-autoinstaller
+WGET_UCLCD=https://raw.githubusercontent.com/xXNightstalkerXx/uctronics-lcd-installer/master/uctronics-lcd-autoinstaller
 WGET_NETDRIVE=https://raw.githubusercontent.com/xXNightstalkerXx/netdrive-connector/master/netdrive-connector
 WGET_PISHRINK=https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh
 
@@ -22,12 +22,417 @@ yellow=$(tput setaf 11 bold)
 pink=$(tput setaf 57)
 blue=$(tput setaf 27 bold)
 
+#Declare Arrays
+USED_PACKAGE_ARRAY=()
+UNUSED_PACKAGE_ARRAY=()
+
+#Function Decalarations
+clear_arrays () {
+	USED_PACKAGE_ARRAY=()
+	UNUSED_PACKAGE_ARRAY=()
+}
+
+set_possible_packages () {
+	if [[ $INSTALL_OPTIONS -eq 1 ]]
+	then
+		#Possible Packages to install for Kali
+		EEPROM_UPDATE=False
+		KALIVNC=True
+		UCLCD=True
+		NETDRIVE=True
+		EEPROM_FLASHER=True
+		PISHRINK=True
+		SAMBA=True
+		GPARTED=True
+		RPIIMAGER=True
+		NO_WIFI=False
+		MNT_NAS=True	
+
+	elif [[ $INSTALL_OPTIONS -eq 2 ]]
+	then
+		#Possible Packages to install for Raspbian Lite
+		EEPROM_UPDATE=True
+		KALIVNC=False
+		UCLCD=True
+		NETDRIVE=True
+		EEPROM_FLASHER=False
+		PISHRINK=True
+		SAMBA=True
+		GPARTED=False
+		RPIIMAGER=False
+		NO_WIFI=True
+		MNT_NAS=True
+
+	elif [[ $INSTALL_OPTIONS -eq 3 ]]
+	then
+		#Possible Packages to install for Raspbian GUI
+		EEPROM_UPDATE=True
+		KALIVNC=False
+		UCLCD=True
+		NETDRIVE=True
+		EEPROM_FLASHER=False
+		PISHRINK=True
+		SAMBA=True
+		GPARTED=True
+		RPIIMAGER=True
+		NO_WIFI=True
+		MNT_NAS=True
+	fi
+}
+
+set_standard_packages () {
+	if [[ $INSTALL_OPTIONS -eq 1 ]]
+	then
+		#Standard Packages to install for Kali
+		KALIVNC=True
+		UCLCD=True
+		NETDRIVE=True
+		EEPROM_FLASHER=True
+		PISHRINK=True
+		SAMBA=True
+		GPARTED=True
+		RPIIMAGER=False
+		MNT_NAS=True
+		USED_PACKAGE_ARRAY=("Kali VNC" "UCTronics LCD" "Netdrive Connector" "EEPROM Flasher" "Pishrink" "Samba" "GParted" "Mount NAS")
+		UNUSED_PACKAGE_ARRAY=("RPI Imager")
+
+		#Packages that can't be installed
+		#EEPROM_UPDATE=False
+		#NO_WIFI=False
+
+	elif [[ $INSTALL_OPTIONS -eq 2 ]]
+	then
+		#Standard Packages to install for Raspbian Lite
+		EEPROM_UPDATE=True
+		UCLCD=True
+		NETDRIVE=True
+		PISHRINK=True
+		SAMBA=True
+		NO_WIFI=True
+		MNT_NAS=False
+		USED_PACKAGE_ARRAY=("Update EEPROM" "UCTronics LCD" "Netdrive Connector" "Pishrink" "Samba" "Disable WIFI")
+		UNUSED_PACKAGE_ARRAY=("Mount NAS")
+
+		#Packages that can't be installed
+		#KALIVNC=False
+		#EEPROM_FLASHER=False
+		#GPARTED=False
+		#RPIIMAGER=False
+
+	elif [[ $INSTALL_OPTIONS -eq 3 ]]
+	then
+		#Standard Packages to install for Raspbian GUI
+		EEPROM_UPDATE=True
+		UCLCD=True
+		NETDRIVE=True
+		PISHRINK=True
+		SAMBA=True
+		GPARTED=True
+		RPIIMAGER=True
+		NO_WIFI=True
+		MNT_NAS=True
+		USED_PACKAGE_ARRAY=("Update EEPROM" "UCTronics LCD" "Netdrive Connector" "Pishrink" "Samba" "GParted" "RPI Imager" "Disable WIFI" "Mount NAS")
+
+		#Packages that can't be installed
+		#KALIVNC=False
+		#EEPROM_FLASHER=False
+	fi
+}
+
+select_custom_packages () {
+	echo ""
+	echo ""
+	echo "${blue}Please select the packages you want to install!"
+
+	if $EEPROM_UPDATE
+	then
+		echo ""
+		echo "${green}Update EEPROM?${std}"
+		read -r -p "Yes (y)/ No (n): " n;
+
+		while ! [[ "$n" =~ ^(y|n)$ ]];
+		do
+        	echo ""
+        	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        	read -r -p "Yes (y)/ No (n): " n;
+		done
+
+		if [[ "$n" =~ ^(y)$ ]];
+		then
+        	EEPROM_UPDATE=True
+			USED_PACKAGE_ARRAY+=("Update EEPROM")
+		else
+        	EEPROM_UPDATE=False
+			UNUSED_PACKAGE_ARRAY+=("Update EEPROM")
+		fi
+	fi
+
+	if $KALIVNC
+	then
+		echo ""
+		echo "${green}Install Kali VNC?${std}"
+		read -r -p "Yes (y)/ No (n): " n;
+
+		while ! [[ "$n" =~ ^(y|n)$ ]];
+		do
+        	echo ""
+        	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        	read -r -p "Yes (y)/ No (n): " n;
+		done
+
+		if [[ "$n" =~ ^(y)$ ]];
+		then
+        	KALIVNC=True
+			USED_PACKAGE_ARRAY+=("Kali VNC")
+		else
+        	KALIVNC=False
+			UNUSED_PACKAGE_ARRAY+=("Kali VNC")
+		fi
+	fi
+
+	if $UCLCD
+	then
+		echo ""
+		echo "${green}Install UCTronics LCD?${std}"
+		read -r -p "Yes (y)/ No (n): " n;
+
+		while ! [[ "$n" =~ ^(y|n)$ ]];
+		do
+        	echo ""
+        	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        	read -r -p "Yes (y)/ No (n): " n;
+		done
+
+		if [[ "$n" =~ ^(y)$ ]];
+		then
+        	UCLCD=True
+			USED_PACKAGE_ARRAY+=("UCTronics LCD")
+		else
+        	UCLCD=False
+			UNUSED_PACKAGE_ARRAY+=("UCTronics LCD")
+		fi
+	fi
+
+	if $NETDRIVE
+	then
+		echo ""
+		echo "${green}Install Netdrive Connector?${std}"
+		read -r -p "Yes (y)/ No (n): " n;
+
+		while ! [[ "$n" =~ ^(y|n)$ ]];
+		do
+        	echo ""
+        	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        	read -r -p "Yes (y)/ No (n): " n;
+		done
+
+		if [[ "$n" =~ ^(y)$ ]];
+		then
+        	NETDRIVE=True
+			USED_PACKAGE_ARRAY+=("Netdrive Connector")
+		else
+        	NETDRIVE=False
+			UNUSED_PACKAGE_ARRAY+=("Netdrive Connector")
+		fi
+	fi
+
+	if $EEPROM_FLASHER
+	then
+		echo ""
+		echo "${green}Install EEPROM Flasher?${std}"
+		read -r -p "Yes (y)/ No (n): " n;
+
+		while ! [[ "$n" =~ ^(y|n)$ ]];
+		do
+        	echo ""
+        	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        	read -r -p "Yes (y)/ No (n): " n;
+		done
+
+		if [[ "$n" =~ ^(y)$ ]];
+		then
+        	EEPROM_FLASHER=True
+			USED_PACKAGE_ARRAY+=("EEPROM Flasher")
+		else
+        	EEPROM_FLASHER=False
+			UNUSED_PACKAGE_ARRAY+=("EEPROM Flasher")
+		fi
+	fi
+
+	if $PISHRINK
+	then
+		echo ""
+		echo "${green}Install Pishrink?${std}"
+		read -r -p "Yes (y)/ No (n): " n;
+
+		while ! [[ "$n" =~ ^(y|n)$ ]];
+		do
+        	echo ""
+        	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        	read -r -p "Yes (y)/ No (n): " n;
+		done
+
+		if [[ "$n" =~ ^(y)$ ]];
+		then
+        	PISHRINK=True
+			USED_PACKAGE_ARRAY+=("Pishrink")
+		else
+        	PISHRINK=False
+			UNUSED_PACKAGE_ARRAY+=("Pishrink")
+		fi
+	fi
+
+	if $SAMBA
+	then
+		echo ""
+		echo "${green}Install Samba?${std}"
+		read -r -p "Yes (y)/ No (n): " n;
+
+		while ! [[ "$n" =~ ^(y|n)$ ]];
+		do
+        	echo ""
+        	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        	read -r -p "Yes (y)/ No (n): " n;
+		done
+
+		if [[ "$n" =~ ^(y)$ ]];
+		then
+        	SAMBA=True
+			USED_PACKAGE_ARRAY+=("Samba")
+		else
+        	SAMBA=False
+			UNUSED_PACKAGE_ARRAY+=("Samba")
+		fi
+	fi
+
+	if $GPARTED
+	then
+		echo ""
+		echo "${green}Install GParted?${std}"
+		read -r -p "Yes (y)/ No (n): " n;
+
+		while ! [[ "$n" =~ ^(y|n)$ ]];
+		do
+        	echo ""
+        	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        	read -r -p "Yes (y)/ No (n): " n;
+		done
+
+		if [[ "$n" =~ ^(y)$ ]];
+		then
+        	GPARTED=True
+			USED_PACKAGE_ARRAY+=("GParted")
+		else
+        	GPARTED=False
+			UNUSED_PACKAGE_ARRAY+=("GParted")
+		fi
+	fi
+
+	if $RPIIMAGER
+	then
+		echo ""
+		echo "${green}Install RPI Imager?${std}"
+		read -r -p "Yes (y)/ No (n): " n;
+
+		while ! [[ "$n" =~ ^(y|n)$ ]];
+		do
+        	echo ""
+        	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        	read -r -p "Yes (y)/ No (n): " n;
+		done
+
+		if [[ "$n" =~ ^(y)$ ]];
+		then
+        	RPIIMAGER=True
+			USED_PACKAGE_ARRAY+=("RPI Imager")
+		else
+        	RPIIMAGER=False
+			UNUSED_PACKAGE_ARRAY+=("RPI Imager")
+		fi
+	fi
+
+	if $NO_WIFI
+	then
+		echo ""
+		echo "${green}Disable Bluetooth and WIFI?${std}"
+		read -r -p "Yes (y)/ No (n): " n;
+
+		while ! [[ "$n" =~ ^(y|n)$ ]];
+		do
+        	echo ""
+        	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        	read -r -p "Yes (y)/ No (n): " n;
+		done
+
+		if [[ "$n" =~ ^(y)$ ]];
+		then
+        	NO_WIFI=True
+			USED_PACKAGE_ARRAY+=("Disable WIFI")
+		else
+        	NO_WIFI=False
+			UNUSED_PACKAGE_ARRAY+=("Disable WIFI")
+		fi
+	fi
+
+	if $MNT_NAS
+	then
+		echo ""
+		echo "${green}Mount a NAS?${std}"
+		read -r -p "Yes (y)/ No (n): " n;
+
+		while ! [[ "$n" =~ ^(y|n)$ ]];
+		do
+        	echo ""
+        	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        	read -r -p "Yes (y)/ No (n): " n;
+		done
+
+		if [[ "$n" =~ ^(y)$ ]];
+		then
+        	MNT_NAS=True
+			USED_PACKAGE_ARRAY+=("Mount NAS")
+		else
+        	MNT_NAS=False
+			UNUSED_PACKAGE_ARRAY+=("Mount NAS")
+		fi
+	fi
+}
+
+show_packages_to_install () {
+	echo ""
+	echo ""
+	echo "${blue}The following Packages are selected for Installation:${std}"
+	echo ""
+
+	for i in "${USED_PACKAGE_ARRAY[@]}" 
+	do
+        printf "%s\n" "${i}"
+	done
+
+	if ! [[ ${#UNUSED_PACKAGE_ARRAY[@]} -eq 0 ]]
+	then
+		echo ""
+		echo "${blue}The following Packages are available for Installation but are NOT selected:${std}"
+		echo ""
+
+		for i in "${UNUSED_PACKAGE_ARRAY[@]}"
+		do
+        	printf "%s\n" "${i}"
+		done
+	else
+		echo ""
+		echo "${blue}There are no other Packages available to install!${std}"
+	fi
+}
+
+
 #Main Script
 echo "${blue}Updating Repository List...${std}"
 sudo apt-get update
 echo ""
 echo "${blue}Repository List updated! Continuing Installation!${std}"
 sleep 1
+
 
 echo ""
 echo ""
@@ -56,6 +461,7 @@ else
         echo "${red}Not updating your OS! Installation might fail!${std}"
 		sleep 1
 fi
+
 
 echo ""
 echo ""
@@ -112,20 +518,124 @@ else
 	exit 1
 fi
 
-if [[ $INSTALL_OPTIONS -eq 1 ]]
-then
-	#OS Specific Directory Declarations
-	BLACKLIST=/etc/modprobe.d/kalipi-blacklist.conf
-elif [[ $INSTALL_OPTIONS -eq 2 ]]
-then
-	#OS Specific Directory Declarations
-	BLACKLIST=/etc/modprobe.d/raspi-blacklist.conf
-elif [[ $INSTALL_OPTIONS -eq 3 ]]
-then
-	#OS Specific Directory Declarations
-	BLACKLIST=/etc/modprobe.d/raspi-blacklist.conf
-fi
+#if [[ $INSTALL_OPTIONS -eq 1 ]]
+#then
+	#Possible Packages to install
+	#set_possible_packages
+	#clear_arrays
+
+#elif [[ $INSTALL_OPTIONS -eq 2 ]]
+#then
+	#Possible Packages to install
+	#set_possible_packages
+	#clear_arrays
+
+#elif [[ $INSTALL_OPTIONS -eq 3 ]]
+#then
+	#Possible Packages to install
+	#set_possible_packages
+	#clear_arrays
+
+#fi
 
 echo ""
 echo "${blue}Operating System okay! Continuing the Installation!${std}"
+sleep 1
+
+
+echo ""
+echo ""
+echo "${green}Do you want to install the Standard Packages or select them yourself?${std}"
+echo ""
+echo "1. Install Standard Packages"
+echo "2. Select Custom Packages"
+
+echo ""
+read -r -p "${green}Enter a Number for an Option: ${std}" n
+
+while [[ $n -lt 1 || $n -gt 2 ]]
+do
+        echo ""
+        echo "${red}Wrong Input! Please Select a Number for an Option!${std}"
+        read -r -p "Enter a Number for an Option: " n;
+done
+
+if [[ $n -eq 1 ]]
+then
+	clear_arrays
+	set_possible_packages
+	set_standard_packages
+	show_packages_to_install
+	echo ""
+	echo "${green}Do you want to change something?${std}"
+	read -r -p "Yes (y)/ No (n): " n;
+
+	while ! [[ "$n" =~ ^(y|n)$ ]];
+	do
+    	echo ""
+        echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        read -r -p "Yes (y)/ No (n): " n;
+	done
+
+	if [[ "$n" =~ ^(y)$ ]];
+	then
+		while ! [[ "$n" =~ ^(n)$ ]];
+		do
+        	clear_arrays
+			set_possible_packages
+			select_custom_packages
+    		show_packages_to_install
+			echo ""
+			echo "${green}Do you want to change something?${std}"
+			read -r -p "Yes (y)/ No (n): " n;
+
+			while ! [[ "$n" =~ ^(y|n)$ ]];
+			do
+    			echo ""
+        		echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        		read -r -p "Yes (y)/ No (n): " n;
+			done
+		done
+	fi
+else
+	n="y"
+	while ! [[ "$n" =~ ^(n)$ ]];
+	do
+        clear_arrays
+		set_possible_packages
+		select_custom_packages
+    	show_packages_to_install
+		echo ""
+		echo "${green}Do you want to change something?${std}"
+		read -r -p "Yes (y)/ No (n): " n;
+
+		while ! [[ "$n" =~ ^(y|n)$ ]];
+		do
+    		echo ""
+        	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+        	read -r -p "Yes (y)/ No (n): " n;
+		done
+	done
+fi
+
+echo ""
+echo "${blue}Packages selected! Continuing Installation!${std}"
+sleep 1
+
+
+echo ""
+echo ""
+echo "${blue}Checking if Git is installed...${std}"
+if hash git 2>/dev/null
+then
+	echo ""
+        echo "${blue}Git is already installed!${std}"
+else
+	echo ""
+        echo "${red}Git is not installed. Installing Git now!${std}"
+	sudo apt-get install git -y
+	sleep 1
+fi
+echo ""
+echo "${blue}Git is installed and okay! Continuing Installation!${std}"
 sleep 1
