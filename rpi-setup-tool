@@ -3,16 +3,28 @@
 #General Directory Declarations
 START_DIR=$PWD
 TEMP_DIR=/tmp/downloads
+BAK_DIR=/tmp/backup
 SCRIPTS_DIR=/usr/bin
+NAS_DIR=/mnt/ImageStorage
 CONFIG=/boot/config.txt
-MODULES=/etc/modules
+CONFIG_BAK="${BAK_DIR}/config_rpisetup.bak"
+FSTAB=/etc/fstab
+FSTAB_BAK="${BAK_DIR}/fstab_rpisetup.bak"
+
+#Package Filename Declarations
+KALIVNC_FILENAME=rpi-kalivnc-autoinstaller
+EEPROM_FILENAME=rpi-eeprom-autoinstaller
+UCLCD_FILENAME=uctronics-lcd-autoinstaller
+NETDRIVE_FILENAME=netdrive-connector
+PISHRINK_FILENAME_LONG=pishrink.sh
+PISHRINK_FILENAME_SHORT=pishrink
 
 #WGET URL Declarations
-WGET_KALIVNC=https://raw.githubusercontent.com/xXNightstalkerXx/rpi-kalivnc-installer/master/rpi-kalivnc-autoinstaller
-WGET_EEPROM=https://raw.githubusercontent.com/xXNightstalkerXx/rpi-eeprom-flasher/master/rpi-eeprom-autoinstaller
-WGET_UCLCD=https://raw.githubusercontent.com/xXNightstalkerXx/uctronics-lcd-installer/master/uctronics-lcd-autoinstaller
-WGET_NETDRIVE=https://raw.githubusercontent.com/xXNightstalkerXx/netdrive-connector/master/netdrive-connector
-WGET_PISHRINK=https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh
+WGET_KALIVNC="https://raw.githubusercontent.com/xXNightstalkerXx/rpi-kalivnc-installer/master/${KALIVNC_FILENAME}"
+WGET_EEPROM="https://raw.githubusercontent.com/xXNightstalkerXx/rpi-eeprom-flasher/master/${EEPROM_FILENAME}"
+WGET_UCLCD="https://raw.githubusercontent.com/xXNightstalkerXx/uctronics-lcd-installer/master/${UCLCD_FILENAME}"
+WGET_NETDRIVE="https://raw.githubusercontent.com/xXNightstalkerXx/netdrive-connector/master/${NETDRIVE_FILENAME}"
+WGET_PISHRINK="https://raw.githubusercontent.com/Drewsif/PiShrink/master/${PISHRINK_FILENAME_LONG}"
 
 #Color Declarations
 std=$(tput setaf 15)
@@ -37,6 +49,7 @@ set_possible_packages () {
 	then
 		#Possible Packages to install for Kali
 		EEPROM_UPDATE=false
+		RASPI_CONFIG=true
 		KALIVNC=true
 		UCLCD=true
 		NETDRIVE=true
@@ -52,6 +65,7 @@ set_possible_packages () {
 	then
 		#Possible Packages to install for Raspbian Lite
 		EEPROM_UPDATE=true
+		RASPI_CONFIG=false
 		KALIVNC=false
 		UCLCD=true
 		NETDRIVE=true
@@ -67,6 +81,7 @@ set_possible_packages () {
 	then
 		#Possible Packages to install for Raspbian GUI
 		EEPROM_UPDATE=true
+		RASPI_CONFIG=false
 		KALIVNC=false
 		UCLCD=true
 		NETDRIVE=true
@@ -84,6 +99,7 @@ set_standard_packages () {
 	if [[ $INSTALL_OPTIONS -eq 1 ]]
 	then
 		#Standard Packages to install for Kali
+		RASPI_CONFIG=true
 		KALIVNC=true
 		UCLCD=true
 		NETDRIVE=true
@@ -93,7 +109,7 @@ set_standard_packages () {
 		GPARTED=true
 		RPIIMAGER=false
 		MNT_NAS=true
-		USED_PACKAGE_ARRAY=("Kali VNC" "UCTronics LCD" "Netdrive Connector" "EEPROM Flasher" "Pishrink" "Samba" "GParted" "Mount NAS")
+		USED_PACKAGE_ARRAY=("RPI Config" "Kali VNC" "UCTronics LCD" "Netdrive Connector" "EEPROM Flasher" "Pishrink" "Samba" "GParted" "Mount NAS")
 		UNUSED_PACKAGE_ARRAY=("RPI Imager")
 
 		#Packages that can't be installed
@@ -114,6 +130,7 @@ set_standard_packages () {
 		UNUSED_PACKAGE_ARRAY=("Mount NAS")
 
 		#Packages that can't be installed
+		#RASPI_CONFIG=false
 		#KALIVNC=false
 		#EEPROM_FLASHER=false
 		#GPARTED=false
@@ -134,6 +151,7 @@ set_standard_packages () {
 		USED_PACKAGE_ARRAY=("Update EEPROM" "UCTronics LCD" "Netdrive Connector" "Pishrink" "Samba" "GParted" "RPI Imager" "Disable WIFI" "Mount NAS")
 
 		#Packages that can't be installed
+		#RASPI_CONFIG=false
 		#KALIVNC=false
 		#EEPROM_FLASHER=false
 	fi
@@ -164,6 +182,29 @@ select_custom_packages () {
 		else
 			EEPROM_UPDATE=false
 			UNUSED_PACKAGE_ARRAY+=("Update EEPROM")
+		fi
+	fi
+
+	if $RASPI_CONFIG
+	then
+		echo ""
+		echo "${green}Install RPI Config?${std}"
+		read -r -p "Yes (y)/ No (n): " n;
+
+		while ! [[ "$n" =~ ^(y|n)$ ]];
+		do
+			echo ""
+			echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+			read -r -p "Yes (y)/ No (n): " n;
+		done
+
+		if [[ "$n" =~ ^(y)$ ]];
+		then
+			RASPI_CONFIG=true
+			USED_PACKAGE_ARRAY+=("RPI Config")
+		else
+			RASPI_CONFIG=false
+			UNUSED_PACKAGE_ARRAY+=("RPI Config")
 		fi
 	fi
 
@@ -404,7 +445,7 @@ show_packages_to_install () {
 	echo "${blue}The following Packages are selected for Installation:${std}"
 	echo ""
 
-	for i in "${USED_PACKAGE_ARRAY[@]}" 
+	for i in "${USED_PACKAGE_ARRAY[@]}"
 	do
 		printf "%s\n" "${i}"
 	done
@@ -425,53 +466,338 @@ show_packages_to_install () {
 	fi
 }
 
+install_eeprom_update () {
+	echo ""
+	echo ""
+	echo "${blue}Updating the EEPROM...${std}"
+	echo ""
+	sudo rpi-eeprom-update -d -a
+	echo ""
+	echo "${blue}EEPROM updated! Continuing Installation!${std}"
+	sleep 1
+}
+
+install_raspi_config () {
+	echo ""
+	echo ""
+	echo "${blue}Installing RPI Config...${std}"
+	echo ""
+	sudo apt-get install kalipi-config -y
+	echo ""
+	echo "${blue}RPI Config Installed! Continuing Installation!${std}"
+	sleep 1
+}
+
+install_kalivnc () {
+	echo ""
+	echo ""
+	echo "${blue}Installing Kali VNC...${std}"
+	echo ""
+	echo "${blue}Switching to ${TEMP_DIR} ...${std}"
+	cd $TEMP_DIR
+	echo "${blue}Downloading Kali VNC Installer...${std}"
+	sudo wget $WGET_KALIVNC
+	echo "${blue}Making the Installer executable...${std}"
+	sudo chmod 0755 $KALIVNC_FILENAME
+	echo "${blue}Executing the Kali VNC Installer...${std}"
+	echo ""
+	./"${KALIVNC_FILENAME}"
+	echo ""
+	echo "${blue}Kali VNC installed! Continuing Installation!${std}"
+	sleep 1
+}
+
+install_uclcd () {
+	echo ""
+	echo ""
+	echo "${blue}Installing UCTronics LCD...${std}"
+	echo ""
+	echo "${blue}Switching to ${TEMP_DIR} ...${std}"
+	cd $TEMP_DIR
+	echo "${blue}Downloading UCTronics LCD Installer...${std}"
+	sudo wget $WGET_UCLCD
+	echo "${blue}Making the Installer executable...${std}"
+	sudo chmod 0755 $UCLCD_FILENAME
+	echo "${blue}Executing the UCTronics LCD Installer...${std}"
+	echo ""
+	./"${UCLCD_FILENAME}"
+	echo ""
+	echo "${blue}UCTronics LCD installed! Continuing Installation!${std}"
+	sleep 1
+}
+
+install_netdrive () {
+	echo ""
+	echo ""
+	echo "${blue}Installing Netdrive Connector...${std}"
+	echo ""
+	echo "${blue}Switching to ${TEMP_DIR} ...${std}"
+	cd $TEMP_DIR
+	echo "${blue}Downloading Netdrive Connector...${std}"
+	sudo wget $WGET_NETDRIVE
+	echo "${blue}Making the Script executable...${std}"
+	sudo chmod 0755 $NETDRIVE_FILENAME
+	echo "${blue}Moving the Script to ${SCRIPTS_DIR} ...${std}"
+	sudo mv $NETDRIVE_FILENAME "${SCRIPTS_DIR}/${NETDRIVE_FILENAME}"
+	echo ""
+	echo "${blue}Netdrive Connector installed! Continuing Installation!${std}"
+	sleep 1
+}
+
+install_eeprom_flasher () {
+	echo ""
+	echo ""
+	echo "${blue}Installing EEPROM Flasher...${std}"
+	echo ""
+	echo "${blue}Switching to ${TEMP_DIR} ...${std}"
+	cd $TEMP_DIR
+	echo "${blue}Downloading EEPROM Flasher Installer...${std}"
+	sudo wget $WGET_EEPROM
+	echo "${blue}Making the Installer executable...${std}"
+	sudo chmod 0755 $EEPROM_FILENAME
+	echo "${blue}Executing the EEPROM Flasher Installer...${std}"
+	echo ""
+	./"${EEPROM_FILENAME}"
+	echo ""
+	echo "${blue}EEPROM Flasher installed! Continuing Installation!${std}"
+	sleep 1
+}
+
+install_pishrink () {
+	echo ""
+	echo ""
+	echo "${blue}Installing Pishrink...${std}"
+	echo ""
+	echo "${blue}Switching to ${TEMP_DIR} ...${std}"
+	cd $TEMP_DIR
+	echo "${blue}Downloading Pishrink...${std}"
+	sudo wget $WGET_PISHRINK
+	echo "${blue}Changing the name of the Script...${std}"
+	sudo mv $PISHRINK_FILENAME_LONG $PISHRINK_FILENAME_SHORT
+	echo "${blue}Making the Script executable...${std}"
+	sudo chmod 0755 $PISHRINK_FILENAME_SHORT
+	echo "${blue}Moving the Script to ${SCRIPTS_DIR} ...${std}"
+	sudo mv $PISHRINK_FILENAME_SHORT "${SCRIPTS_DIR}/${PISHRINK_FILENAME_SHORT}"
+	echo ""
+	echo "${blue}Pishrink installed! Continuing Installation!${std}"
+	sleep 1
+}
+
+install_samba () {
+	echo ""
+	echo ""
+	echo "${blue}Installing Samba...${std}"
+	echo ""
+	echo "${blue}Checking if Samba is already installed...${std}"
+
+	if hash smbpasswd 2>/dev/null
+	then
+		echo "${blue}Samba is already installed!${std}"
+	else
+		echo "${blue}Samba is not installed. Installing Samba now!${std}"
+		echo ""
+		sudo apt-get install samba-common -y
+		echo ""
+		echo "${green}Please input a new Samba Password!${std}"
+		smbpasswd
+		sleep 1
+	fi
+
+	echo ""
+	echo "${blue}Samba is installed and okay! Continuing Installation!${std}"
+	sleep 1
+}
+
+install_gparted () {
+	echo ""
+	echo ""
+	echo "${blue}Installing GParted...${std}"
+	echo ""
+	echo "${blue}Checking if GParted is already installed...${std}"
+
+	if hash gparted 2>/dev/null
+	then
+		echo "${blue}GParted is already installed!${std}"
+	else
+		echo "${blue}GParted is not installed. Installing GParted now!${std}"
+		echo ""
+		sudo apt-get install gparted -y
+		sleep 1
+	fi
+
+	echo ""
+	echo "${blue}GParted is installed and okay! Continuing Installation!${std}"
+	sleep 1
+}
+
+install_rpi_imager () {
+	echo ""
+	echo ""
+	echo "${blue}Installing RPI Imager...${std}"
+	echo ""
+	echo "${blue}Checking if RPI Imager is already installed...${std}"
+
+	if hash rpi-imager 2>/dev/null
+	then
+		echo "${blue}RPI Imager is already installed!${std}"
+	else
+		echo "${blue}RPI Imager is not installed. Installing RPI Imager now!${std}"
+		echo ""
+		sudo apt-get install rpi-imager -y
+		sleep 1
+	fi
+
+	echo ""
+	echo "${blue}RPI Imager is installed and okay! Continuing Installation!${std}"
+	sleep 1
+}
+
+install_no_wifi () {
+	echo ""
+	echo ""
+	echo "${blue}Disabling Bluetooth and WIFI...${std}"
+	echo ""
+	echo "${blue}Creating Backup of ${CONFIG} ...${std}"
+	echo "${blue}Copying ${CONFIG} to ${CONFIG_BAK} ...${std}"
+	sudo cp $CONFIG $CONFIG_BAK
+	echo "${blue}Adding necessary lines at ${CONFIG} ...${std}"
+	echo "dtoverlay=disable-bt" | sudo tee -a $CONFIG > /dev/null
+	echo "dtoverlay=disable-wifi" | sudo tee -a $CONFIG > /dev/null
+	echo "${blue}Disabling Bluetooth UART...${std}"
+	sudo systemctl disable hciuart
+	echo ""
+	echo "${blue}Successfully disabled Bluetooth and WIFI! Continuing the Installation!${std}"
+	sleep 1
+}
+
+install_mnt_nas () {
+	echo ""
+	echo ""
+	echo "${blue}Mounting NAS to ${NAS_DIR} Directory...${std}"
+	echo ""
+	echo "${blue}Checking ${NAS_DIR} Directory...${std}"
+
+	if [ -d "$NAS_DIR" ]
+	then
+		echo "${green}${NAS_DIR} Directory exists. Not Creating this Directory!${std}"
+	else
+		echo "${blue}${NAS_DIR} Directory doesn't exist. Creating the Directory!${std}"
+		sudo mkdir -p $NAS_DIR
+	fi
+
+	echo "${blue}Creating a Backup of ${FSTAB} ...${std}"
+	sudo cp $FSTAB $FSTAB_BAK
+	echo ""
+	read -r -p "${green}Enter the IP of the NAS Server: ${std}" ip_adress;
+	echo "${blue}Checking if the Host is reachable...${std}"
+
+	if ping -c 1 "$ip_adress" &> /dev/null
+	then
+		echo "${blue}The Host is reachable!${std}"
+		i=1
+	else
+		i=0
+	fi
+
+	while [[ $i -eq 0 ]]
+	do
+		echo ""
+		echo "${red}The Host is not reachable! Please try a different IP!${std}"
+		read -r -p "Enter the IP of the NAS Server: " ip_adress;
+		echo ""
+		echo "${blue}Checking if the Host is reachable...${std}"
+
+		if ping -c 1 "$ip_adress" &> /dev/null
+		then
+			echo "${blue}The Host is reachable!${std}"
+			i=1
+		else
+			i=0
+		fi
+	done
+
+	echo ""
+	read -r -p "${green}Enter the Sharename of the Drive: ${std}" sharename;
+	echo "${blue}The Sharename is:${std}"
+	echo "$sharename"
+	echo ""
+	read -r -p "${green}Enter the Username for the NAS Server: ${std}" username;
+	echo "${blue}The Username is:${std}"
+	echo "$username"
+	echo ""
+	read -r -s -p "${green}Enter the Password of the User: ${std}" password;
+	echo "${blue}The Password is:${std}"
+	echo "TOPSECRECT"
+	echo ""
+	echo "${blue}Checking if ${NAS_DIR} Directory is empty before mounting...${std}"
+	if [ "$(ls -A "$NAS_DIR")" ]
+	then
+		echo ""
+		echo "${red}${NAS_DIR} Directory contains precious Files!${std}"
+		echo "${yellow}If you proceed with mounting your NAS you will lose access to those Files!${std}"
+		echo "${yellow}You should gain access to your Files again by unmounting the Drive though.${std}"
+		echo ""
+		echo "${green}Do you want to proceed?${std}"
+		read -r -p "Yes (y)/ No (n): " n;
+
+		while ! [[ "$n" =~ ^(y|n)$ ]];
+		do
+			echo ""
+			echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+			read -r -p "Yes (y)/ No (n): " n;
+		done
+
+		if [[ "$n" =~ ^(y)$ ]];
+		then
+			echo ""
+			echo "${blue}Proceeding to mount the Drive!${std}"
+			echo "${blue}Appending the Code needed to mount the NAS to ${FSTAB} file...${std}"
+			echo "//${ip_adress}/${sharename} ${NAS_DIR} cifs username=${username},password=${password},defaults,nofail,_netdev,file_mode=0777,dir_mode=0777 0 0" | sudo tee -a $FSTAB > /dev/null
+
+			if sudo mount -a &> /dev/null
+			then
+				echo ""
+				echo "${blue}Successfully mounted the NAS! Continuing the Installation!${std}"
+				sleep 1
+			else
+				echo ""
+				echo "${red}ERROR - NAS could not be mounted! Continuing the Installation!${std}"
+				sleep 1
+			fi
+		else
+			echo ""
+			echo "${red}ERROR - Operation aborted! Continuing the Installation!${std}"
+			sleep 1
+		fi
+	else
+		echo ""
+		echo "${blue}${NAS_DIR} Directory is empty!${std}"
+		echo "${blue}Appending the Code needed to mount the NAS to ${FSTAB} file...${std}"
+		echo "//${ip_adress}/${sharename} ${NAS_DIR} cifs username=${username},password=${password},defaults,nofail,_netdev,file_mode=0777,dir_mode=0777 0 0" | sudo tee -a $FSTAB > /dev/null
+
+		if sudo mount -a &> /dev/null
+		then
+			echo ""
+			echo "${blue}Successfully mounted the NAS! Continuing the Installation!${std}"
+			sleep 1
+		else
+			echo ""
+			echo "${red}ERROR - NAS could not be mounted! Continuing the Installation!${std}"
+			sleep 1
+		fi
+	fi
+}
 
 #Main Script
-echo "${blue}Updating Repository List...${std}"
-sudo apt-get update
-echo ""
-echo "${blue}Repository List updated! Continuing Installation!${std}"
-sleep 1
-
-
-echo ""
-echo ""
-echo "${green}It is highly recommended to update your OS before Installation!${std}"
-echo "${green}Do you want to update your OS?${std}"
-echo ""
-read -r -p "${green}Yes (y)/ No (n): ${std}" n;
-
-while ! [[ "$n" =~ ^(y|n)$ ]];
-do
-	echo ""
-	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
-	read -r -p "Yes (y)/ No (n): " n;
-done
-
-if [[ "$n" =~ ^(y)$ ]];
-then
-	echo ""
-	echo "${blue}Updating the OS now...${std}"
-	sudo apt-get upgrade -y
-	echo ""
-	echo "${blue}Operating System updated successfully! Continuing the Installation!${std}"
-	sleep 1
-else
-	echo ""
-	echo "${red}Not updating your OS! Installation might fail!${std}"
-	sleep 1
-fi
-
-
 echo ""
 echo ""
 echo "${blue}      ///////////   ///////////   //      ///////////   ///////////  ////////////  //       //  ///////////${std}"
 echo "${blue}     //       //   //       //   //      //            //                //       //       //  //       //${std}"
 echo "${blue}    //       //   //       //   //      //            //                //       //       //  //       //${std}"
 echo "${blue}   ///////////   ///////////   //      ///////////   ///////////       //       //       //  ///////////${std}"
-echo "${blue}  // \\\        //            //               //   //                //       //       //  //${std}"
-echo "${blue} //   \\\      //            //               //   //                //       //       //  //${std}"
-echo "${blue}//     \\\    //            //      ///////////   ///////////       //       ///////////  //${std}"
+echo "${blue}  // \\\         //            //               //   //                //       //       //  //${std}"
+echo "${blue} //   \\\       //            //               //   //                //       //       //  //${std}"
+echo "${blue}//     \\\     //            //      ///////////   ///////////       //       ///////////  //${std}"
 echo "RPI Setup Tool by Nightstalker"
 echo ""
 echo ""
@@ -518,30 +844,95 @@ else
 	exit 1
 fi
 
-#if [[ $INSTALL_OPTIONS -eq 1 ]]
-#then
-	#Possible Packages to install
-	#set_possible_packages
-	#clear_arrays
-
-#elif [[ $INSTALL_OPTIONS -eq 2 ]]
-#then
-	#Possible Packages to install
-	#set_possible_packages
-	#clear_arrays
-
-#elif [[ $INSTALL_OPTIONS -eq 3 ]]
-#then
-	#Possible Packages to install
-	#set_possible_packages
-	#clear_arrays
-
-#fi
-
 echo ""
 echo "${blue}Operating System okay! Continuing the Installation!${std}"
 sleep 1
 
+echo ""
+echo ""
+echo "${blue}Updating Repository List...${std}"
+echo ""
+sudo apt-get update
+echo ""
+echo "${blue}Repository List updated! Continuing Installation!${std}"
+sleep 1
+
+echo ""
+echo ""
+echo "${green}It is highly recommended to update your OS before Installation!${std}"
+echo "${green}Do you want to update your OS?${std}"
+echo ""
+read -r -p "${green}Yes (y)/ No (n): ${std}" n;
+
+while ! [[ "$n" =~ ^(y|n)$ ]];
+do
+	echo ""
+	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+	read -r -p "Yes (y)/ No (n): " n;
+done
+
+if [[ "$n" =~ ^(y)$ ]];
+then
+	echo ""
+	echo "${blue}Updating the OS now...${std}"
+	echo ""
+	sudo apt-get upgrade -y
+	echo ""
+	echo "${blue}Operating System updated successfully! Continuing the Installation!${std}"
+	sleep 1
+else
+	echo ""
+	echo "${red}Not updating your OS! Installation might fail!${std}"
+	sleep 1
+fi
+
+echo ""
+echo ""
+echo "${blue}Checking Directories...${std}"
+echo ""
+echo "${blue}Checking temporary ${TEMP_DIR} Directory...${std}"
+
+if [ -d "$TEMP_DIR" ]
+then
+	echo "${green}Temporary ${TEMP_DIR} Directory exists. Not Creating this Directory!${std}"
+else
+	echo "${blue}Temporary ${TEMP_DIR} Directory doesn't exist. Creating the Directory!${std}"
+	sudo mkdir -p $TEMP_DIR
+fi
+
+echo "${blue}Checking ${BAK_DIR} Directory...${std}"
+
+if [ -d "$BAK_DIR" ]
+then
+	echo "${green}${BAK_DIR} Directory exists. Not Creating this Directory!${std}"
+else
+	echo "${blue}${BAK_DIR} Directory doesn't exist. Creating the Directory!${std}"
+	sudo mkdir -p $BAK_DIR
+fi
+
+echo ""
+echo "${blue}Directories are okay! Continuing the Installation!${std}"
+sleep 1
+
+echo ""
+echo ""
+echo "${blue}Installing Git...${std}"
+echo ""
+echo "${blue}Checking if Git is already installed...${std}"
+
+if hash git 2>/dev/null
+then
+	echo "${blue}Git is already installed!${std}"
+else
+	echo "${red}Git is not installed. Installing Git now!${std}"
+	echo ""
+	sudo apt-get install git -y
+	sleep 1
+fi
+
+echo ""
+echo "${blue}Git is installed and okay! Continuing Installation!${std}"
+sleep 1
 
 echo ""
 echo ""
@@ -622,20 +1013,70 @@ echo ""
 echo "${blue}Packages selected! Continuing Installation!${std}"
 sleep 1
 
+echo ""
+echo ""
+echo "${blue}Installing Packages...${std}"
+
+if $EEPROM_UPDATE
+then
+	install_eeprom_update
+fi
+
+if $RASPI_CONFIG
+then
+	install_raspi_config
+fi
+
+if $KALIVNC
+then
+	install_kalivnc
+fi
+
+if $UCLCD
+then
+	install_uclcd
+fi
+
+if $NETDRIVE
+then
+	install_netdrive
+fi
+
+if $EEPROM_FLASHER
+then
+	install_eeprom_flasher
+fi
+
+if $PISHRINK
+then
+	install_pishrink
+fi
+
+if $SAMBA
+then
+	install_samba
+fi
+
+if $GPARTED
+then
+	install_gparted
+fi
+
+if $RPIIMAGER
+then
+	install_rpi_imager
+fi
+
+if $NO_WIFI
+then
+	install_no_wifi
+fi
+
+if $MNT_NAS
+then
+	install_mnt_nas
+fi
 
 echo ""
-echo ""
-echo "${blue}Checking if Git is installed...${std}"
-if hash git 2>/dev/null
-then
-	echo ""
-	echo "${blue}Git is already installed!${std}"
-else
-	echo ""
-	echo "${red}Git is not installed. Installing Git now!${std}"
-	sudo apt-get install git -y
-	sleep 1
-fi
-echo ""
-echo "${blue}Git is installed and okay! Continuing Installation!${std}"
+echo "${blue}All selected Packages installed! Continuing Installation!${std}"
 sleep 1
