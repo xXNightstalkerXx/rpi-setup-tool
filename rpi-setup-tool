@@ -599,7 +599,7 @@ install_samba () {
 		sudo apt-get install samba-common -y
 		echo ""
 		echo "${green}Please input a new Samba Password!${std}"
-		smbpasswd
+		sudo smbpasswd -a "${USER}"
 		sleep 1
 	fi
 
