@@ -2,6 +2,7 @@
 
 #General Directory Declarations
 START_DIR=$PWD
+MY_PATH="${START_DIR}/rpi-setup-tool"
 TEMP_DIR=/tmp/downloads
 BAK_DIR=/tmp/backup
 SCRIPTS_DIR=/usr/bin
@@ -853,10 +854,38 @@ sleep 1
 
 echo ""
 echo ""
+echo "${green}Do you want to change your Password?${std}"
+read -r -p "Yes (y)/ No (n): " n;
+
+while ! [[ "$n" =~ ^(y|n)$ ]];
+do
+	echo ""
+	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+	read -r -p "Yes (y)/ No (n): " n;
+done
+
+if [[ "$n" =~ ^(y)$ ]];
+then
+	echo ""
+	echo "${blue}Please change your password for ${USER} ...${std}"
+	passwd
+	echo ""
+	echo "${blue}Please change your password for root ...${std}"
+	sudo passwd
+	echo ""
+	echo "${blue}Password changed successfully! Continuing the Installation!${std}"
+	sleep 1
+else
+	echo ""
+	echo "${blue}Not changing your password! Continuing the Installation!${std}"
+	sleep 1
+fi
+
+echo ""
+echo ""
 echo "${green}It is highly recommended to update your OS before Installation!${std}"
 echo "${green}Do you want to update your OS?${std}"
-echo ""
-read -r -p "${green}Yes (y)/ No (n): ${std}" n;
+read -r -p "Yes (y)/ No (n): " n;
 
 while ! [[ "$n" =~ ^(y|n)$ ]];
 do
@@ -1102,3 +1131,66 @@ fi
 echo ""
 echo "${blue}All selected Packages installed! Continuing Installation!${std}"
 sleep 1
+
+echo ""
+echo ""
+echo "${blue}Cleaning up the Installation...${std}"
+echo ""
+echo "${blue}Checking temporary ${TEMP_DIR} Directory...${std}"
+
+if [ -d "$TEMP_DIR" ]
+then
+	echo "${blue}Temporary ${TEMP_DIR} Directory exists. Purging this Directory!${std}"
+	sudo rm -d -r $TEMP_DIR
+else
+	echo "${green}Temporary ${TEMP_DIR} Directory doesn't exist. Not able to delete it!${std}"
+fi
+
+echo "${blue}Checking if I exist in the Directory I'm run...${std}"
+
+if [ -f "${MY_PATH}" ]
+then
+	echo "${blue}It seems I still exist. Purging myself now for Cleanup...${std}"
+	i_exist=true
+else
+	echo "${red}It seems I don't exist in the Directory I'm run. Not able to clean myself up!${std}"
+	i_exist=false
+fi
+
+echo ""
+echo "${blue}Cleanup complete! Continuing the Installation!${std}"
+sleep 1
+
+echo ""
+echo ""
+echo "${green}It is highly recommended to reboot after Installation!${std}"
+echo "${green}Do you want to reboot now?${std}"
+read -r -p "Yes (y)/ No (n): " n;
+
+while ! [[ "$n" =~ ^(y|n)$ ]];
+do
+	echo ""
+	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+	read -r -p "Yes (y)/ No (n): " n;
+done
+
+if [[ "$n" =~ ^(y)$ ]];
+then
+	echo ""
+	echo "${green}Installation complete! Rebooting now...${std}"
+	if $i_exist
+	then
+		sudo rm "${MY_PATH}"
+	fi
+	sudo reboot now
+	sleep 1
+else
+	echo ""
+	echo "${red}Installation complete! Not Rebooting!${std}"
+	echo "${red}Please reboot your System whenever it is convenient!${std}"
+	if $i_exist
+	then
+		sudo rm "${MY_PATH}"
+	fi
+	sleep 1
+fi
