@@ -15,6 +15,7 @@ Also feel free to contribute to this Repository and make it better :)
 ----------------------------------------------------------------
 # INSTALLATION
 
+
     wget https://raw.githubusercontent.com/xXNightstalkerXx/rpi-setup-tool/master/rpi-setup-tool
 Download the Setup Tool Script with wget
 
