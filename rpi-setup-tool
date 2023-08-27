@@ -657,9 +657,6 @@ install_no_wifi () {
 	echo ""
 	echo "${blue}Disabling Bluetooth and WIFI...${std}"
 	echo ""
-	echo "${blue}Creating Backup of ${CONFIG} ...${std}"
-	echo "${blue}Copying ${CONFIG} to ${CONFIG_BAK} ...${std}"
-	sudo cp $CONFIG $CONFIG_BAK
 	echo "${blue}Adding necessary lines at ${CONFIG} ...${std}"
 	echo "dtoverlay=disable-bt" | sudo tee -a $CONFIG > /dev/null
 	echo "dtoverlay=disable-wifi" | sudo tee -a $CONFIG > /dev/null
@@ -685,8 +682,6 @@ install_mnt_nas () {
 		sudo mkdir -p $NAS_DIR
 	fi
 
-	echo "${blue}Creating a Backup of ${FSTAB} ...${std}"
-	sudo cp $FSTAB $FSTAB_BAK
 	echo ""
 	read -r -p "${green}Enter the IP of the NAS Server: ${std}" ip_adress;
 	echo "${blue}Checking if the Host is reachable...${std}"
@@ -1012,6 +1007,34 @@ fi
 echo ""
 echo "${blue}Packages selected! Continuing Installation!${std}"
 sleep 1
+
+echo ""
+echo ""
+echo "${blue}Creating Backups if neccessary...${std}"
+if [[ $NO_WIFI || $MNT_NAS ]]
+then
+	if $NO_WIFI
+	then
+		echo ""
+		echo "${blue}Creating a Backup of ${CONFIG} ...${std}"
+		echo "${blue}Copying ${CONFIG} to ${CONFIG_BAK} ...${std}"
+		sudo cp $CONFIG $CONFIG_BAK
+	fi
+	if $MNT_NAS
+	then
+		echo ""
+		echo "${blue}Creating a Backup of ${FSTAB} ...${std}"
+		echo "${blue}Copying ${FSTAB} to ${FSTAB_BAK} ...${std}"
+		sudo cp $FSTAB $FSTAB_BAK
+	fi
+	echo ""
+	echo "${blue}Backups created successfully! Continuing Installation!${std}"
+	sleep 1
+else
+	echo ""
+	echo "${blue}No Backups needed! Continuing Installation!${std}"
+	sleep 1
+fi
 
 echo ""
 echo ""
