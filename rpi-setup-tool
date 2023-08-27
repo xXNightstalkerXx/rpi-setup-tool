@@ -3,8 +3,9 @@
 #General Directory Declarations
 START_DIR=$PWD
 MY_PATH="${START_DIR}/rpi-setup-tool"
+INSTALL_DIR=/etc/rpi-setup-tool
+BAK_DIR="${INSTALL_DIR}/backup"
 TEMP_DIR=/tmp/downloads
-BAK_DIR=/tmp/backup
 SCRIPTS_DIR=/usr/bin
 NAS_DIR=/mnt/ImageStorage
 CONFIG=/boot/config.txt
@@ -921,6 +922,16 @@ then
 else
 	echo "${blue}Temporary ${TEMP_DIR} Directory doesn't exist. Creating the Directory!${std}"
 	sudo mkdir -p $TEMP_DIR
+fi
+
+echo "${blue}Checking ${INSTALL_DIR} Directory...${std}"
+
+if [ -d "$INSTALL_DIR" ]
+then
+	echo "${green}${INSTALL_DIR} Directory exists. Not Creating this Directory!${std}"
+else
+	echo "${blue}${INSTALL_DIR} Directory doesn't exist. Creating the Directory!${std}"
+	sudo mkdir -p $INSTALL_DIR
 fi
 
 echo "${blue}Checking ${BAK_DIR} Directory...${std}"
