@@ -57,7 +57,7 @@ set_possible_packages () {
 		PISHRINK=true
 		SAMBA=true
 		GPARTED=true
-		RPIIMAGER=true
+		RPIIMAGER=false
 		NO_WIFI=false
 		MNT_NAS=true	
 
@@ -107,14 +107,13 @@ set_standard_packages () {
 		PISHRINK=true
 		SAMBA=true
 		GPARTED=true
-		RPIIMAGER=false
 		MNT_NAS=true
 		USED_PACKAGE_ARRAY=("RPI Config" "Kali VNC" "UCTronics LCD" "Netdrive Connector" "EEPROM Flasher" "Pishrink" "Samba" "GParted" "Mount NAS")
-		UNUSED_PACKAGE_ARRAY=("RPI Imager")
 
 		#Packages that can't be installed
 		#EEPROM_UPDATE=false
 		#NO_WIFI=false
+		#RPIIMAGER=false
 
 	elif [[ $INSTALL_OPTIONS -eq 2 ]]
 	then
