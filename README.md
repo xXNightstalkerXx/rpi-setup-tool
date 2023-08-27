@@ -2,9 +2,6 @@
 This Installer guides you through the Installation of some standard packages I created and
 makes the Setup of a Pi in General easier and faster.
 
-It will guide you through the Setup of the Interfaces and some standard Settings that are
-usually found within raspi-config.
-
 I'm not an expert Coder so use this Repo on your own Risk and don't blame me if you have to reinstall your Raspberry.
 
 If you find something interesting within my Scripts feel free to copy parts of it and implement it into your own code.
