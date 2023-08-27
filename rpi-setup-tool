@@ -597,12 +597,12 @@ install_samba () {
 		echo "${blue}Samba is not installed. Installing Samba now!${std}"
 		echo ""
 		sudo apt-get install samba-common -y
-		echo ""
-		echo "${green}Please input a new Samba Password!${std}"
-		sudo smbpasswd -a "${USER}"
 		sleep 1
 	fi
 
+	echo ""
+	echo "${green}Please input a new Samba Password!${std}"
+	sudo smbpasswd -a "${USER}"
 	echo ""
 	echo "${blue}Samba is installed and okay! Continuing Installation!${std}"
 	sleep 1
