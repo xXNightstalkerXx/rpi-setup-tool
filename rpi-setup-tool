@@ -1,7 +1,6 @@
 #! /bin/bash
 
 #General Directory Declarations
-
 START_DIR=$PWD
 TEMP_DIR=/tmp/downloads
 BAK_DIR=/tmp/backup

@@ -10,7 +10,6 @@ I'm not an expert Coder so use this Repo on your own Risk and don't blame me if 
 If you find something interesting within my Scripts feel free to copy parts of it and implement it into your own code.
 Also feel free to contribute to this Repository and make it better :)
 
-
 ----------------------------------------------------------------
 ----------------------------------------------------------------
 # INSTALLATION
