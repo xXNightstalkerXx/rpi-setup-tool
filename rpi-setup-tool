@@ -591,13 +591,13 @@ install_samba () {
 	echo ""
 	echo "${blue}Checking if Samba is already installed...${std}"
 
-	if hash smbpasswd 2>/dev/null
+	if hash smbd 2>/dev/null
 	then
 		echo "${blue}Samba is already installed!${std}"
 	else
 		echo "${blue}Samba is not installed. Installing Samba now!${std}"
 		echo ""
-		sudo apt-get install samba-common -y
+		sudo apt-get install samba samba-common -y
 		sleep 1
 	fi
 
@@ -855,7 +855,7 @@ sleep 1
 
 echo ""
 echo ""
-echo "${green}Do you want to change your Password?${std}"
+echo "${green}Do you want to change your Password for ${USER}?${std}"
 read -r -p "Yes (y)/ No (n): " n;
 
 while ! [[ "$n" =~ ^(y|n)$ ]];
@@ -870,6 +870,29 @@ then
 	echo ""
 	echo "${blue}Please change your password for ${USER} ...${std}"
 	passwd
+	echo ""
+	echo "${blue}Password changed successfully! Continuing the Installation!${std}"
+	sleep 1
+else
+	echo ""
+	echo "${blue}Not changing your Userpassword! Continuing the Installation!${std}"
+	sleep 1
+fi
+
+echo ""
+echo ""
+echo "${green}Do you want to change your Password for root?${std}"
+read -r -p "Yes (y)/ No (n): " n;
+
+while ! [[ "$n" =~ ^(y|n)$ ]];
+do
+	echo ""
+	echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+	read -r -p "Yes (y)/ No (n): " n;
+done
+
+if [[ "$n" =~ ^(y)$ ]];
+then
 	echo ""
 	echo "${blue}Please change your password for root ...${std}"
 	sudo passwd
