@@ -1149,7 +1149,7 @@ then
 		CRONOUT=$(sudo crontab -u root -l 2>&1)
 		if [[ $CRONOUT == "no crontab for root" ]]
 		then
-			echo "There is no Crontab! Nothing to backup!"
+			echo "${green}There is no Crontab! Nothing to backup!${std}"
 		else
 			echo "${blue}There is a Crontab! Creating a Backup of it ...${std}"
 			echo "${blue}Copying the Crontab to ${CRON_BAK} ...${std}"
