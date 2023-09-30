@@ -12,11 +12,13 @@ CONFIG=/boot/config.txt
 CONFIG_BAK="${BAK_DIR}/config_rpisetup.bak"
 FSTAB=/etc/fstab
 FSTAB_BAK="${BAK_DIR}/fstab_rpisetup.bak"
+CRON_BAK="${BAK_DIR}/crontab.bak"
 
 #Package Filename Declarations
 KALIVNC_FILENAME=rpi-kalivnc-autoinstaller
 EEPROM_FILENAME=rpi-eeprom-autoinstaller
 UCLCD_FILENAME=uctronics-lcd-autoinstaller
+ISPBUSTER_FILENAME=isp-buster-autoinstaller
 NETDRIVE_FILENAME=netdrive-connector
 PISHRINK_FILENAME_LONG=pishrink.sh
 PISHRINK_FILENAME_SHORT=pishrink
@@ -25,6 +27,7 @@ PISHRINK_FILENAME_SHORT=pishrink
 WGET_KALIVNC="https://raw.githubusercontent.com/xXNightstalkerXx/rpi-kalivnc-installer/master/${KALIVNC_FILENAME}"
 WGET_EEPROM="https://raw.githubusercontent.com/xXNightstalkerXx/rpi-eeprom-flasher/master/${EEPROM_FILENAME}"
 WGET_UCLCD="https://raw.githubusercontent.com/xXNightstalkerXx/uctronics-lcd-installer/master/${UCLCD_FILENAME}"
+WGET_ISPBUSTER="https://raw.githubusercontent.com/xXNightstalkerXx/isp-buster/master/${ISPBUSTER_FILENAME}"
 WGET_NETDRIVE="https://raw.githubusercontent.com/xXNightstalkerXx/netdrive-connector/master/${NETDRIVE_FILENAME}"
 WGET_PISHRINK="https://raw.githubusercontent.com/Drewsif/PiShrink/master/${PISHRINK_FILENAME_LONG}"
 
@@ -33,7 +36,7 @@ std=$(tput setaf 15)
 red=$(tput setaf 9 bold)
 green=$(tput setaf 10 bold)
 yellow=$(tput setaf 11 bold)
-pink=$(tput setaf 57)
+#pink=$(tput setaf 57)
 blue=$(tput setaf 27 bold)
 
 #Declare Arrays
@@ -61,7 +64,8 @@ set_possible_packages () {
 		GPARTED=true
 		RPIIMAGER=false
 		NO_WIFI=false
-		MNT_NAS=true	
+		MNT_NAS=true
+		ISPBUSTER=true
 
 	elif [[ $INSTALL_OPTIONS -eq 2 ]]
 	then
@@ -78,6 +82,7 @@ set_possible_packages () {
 		RPIIMAGER=false
 		NO_WIFI=true
 		MNT_NAS=true
+		ISPBUSTER=true
 
 	elif [[ $INSTALL_OPTIONS -eq 3 ]]
 	then
@@ -94,6 +99,7 @@ set_possible_packages () {
 		RPIIMAGER=true
 		NO_WIFI=true
 		MNT_NAS=true
+		ISPBUSTER=true
 	fi
 }
 
@@ -110,7 +116,9 @@ set_standard_packages () {
 		SAMBA=true
 		GPARTED=true
 		MNT_NAS=true
+		ISPBUSTER=false
 		USED_PACKAGE_ARRAY=("RPI Config" "Kali VNC" "UCTronics LCD" "Netdrive Connector" "EEPROM Flasher" "Pishrink" "Samba" "GParted" "Mount NAS")
+		UNUSED_PACKAGE_ARRAY=("ISP Buster")
 
 		#Packages that can't be installed
 		#EEPROM_UPDATE=false
@@ -127,8 +135,9 @@ set_standard_packages () {
 		SAMBA=true
 		NO_WIFI=true
 		MNT_NAS=false
+		ISPBUSTER=false
 		USED_PACKAGE_ARRAY=("Update EEPROM" "UCTronics LCD" "Netdrive Connector" "Pishrink" "Samba" "Disable WIFI")
-		UNUSED_PACKAGE_ARRAY=("Mount NAS")
+		UNUSED_PACKAGE_ARRAY=("Mount NAS" "ISP Buster")
 
 		#Packages that can't be installed
 		#RASPI_CONFIG=false
@@ -149,7 +158,9 @@ set_standard_packages () {
 		RPIIMAGER=true
 		NO_WIFI=true
 		MNT_NAS=true
+		ISPBUSTER=false
 		USED_PACKAGE_ARRAY=("Update EEPROM" "UCTronics LCD" "Netdrive Connector" "Pishrink" "Samba" "GParted" "RPI Imager" "Disable WIFI" "Mount NAS")
+		UNUSED_PACKAGE_ARRAY=("ISP Buster")
 
 		#Packages that can't be installed
 		#RASPI_CONFIG=false
@@ -298,6 +309,29 @@ select_custom_packages () {
 		else
 			EEPROM_FLASHER=false
 			UNUSED_PACKAGE_ARRAY+=("EEPROM Flasher")
+		fi
+	fi
+
+	if $ISPBUSTER
+	then
+		echo ""
+		echo "${green}Install ISP Buster?${std}"
+		read -r -p "Yes (y)/ No (n): " n;
+
+		while ! [[ "$n" =~ ^(y|n)$ ]];
+		do
+			echo ""
+			echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+			read -r -p "Yes (y)/ No (n): " n;
+		done
+
+		if [[ "$n" =~ ^(y)$ ]];
+		then
+			ISPBUSTER=true
+			USED_PACKAGE_ARRAY+=("ISP Buster")
+		else
+			ISPBUSTER=false
+			UNUSED_PACKAGE_ARRAY+=("ISP Buster")
 		fi
 	fi
 
@@ -561,6 +595,25 @@ install_eeprom_flasher () {
 	./"${EEPROM_FILENAME}"
 	echo ""
 	echo "${blue}EEPROM Flasher installed! Continuing Installation!${std}"
+	sleep 1
+}
+
+install_ispbuster () {
+	echo ""
+	echo ""
+	echo "${blue}Installing ISP Buster...${std}"
+	echo ""
+	echo "${blue}Switching to ${TEMP_DIR} ...${std}"
+	cd $TEMP_DIR
+	echo "${blue}Downloading ISP Buster Installer...${std}"
+	sudo wget $WGET_ISPBUSTER
+	echo "${blue}Making the Installer executable...${std}"
+	sudo chmod 0755 $ISPBUSTER_FILENAME
+	echo "${blue}Executing the ISP Buster Installer...${std}"
+	echo ""
+	./"${ISPBUSTER_FILENAME}"
+	echo ""
+	echo "${blue}ISP Buster installed! Continuing Installation!${std}"
 	sleep 1
 }
 
@@ -1073,7 +1126,7 @@ sleep 1
 echo ""
 echo ""
 echo "${blue}Creating Backups if neccessary...${std}"
-if [[ $NO_WIFI || $MNT_NAS ]]
+if [[ $NO_WIFI || $MNT_NAS || $ISPBUSTER ]]
 then
 	if $NO_WIFI
 	then
@@ -1088,6 +1141,20 @@ then
 		echo "${blue}Creating a Backup of ${FSTAB} ...${std}"
 		echo "${blue}Copying ${FSTAB} to ${FSTAB_BAK} ...${std}"
 		sudo cp $FSTAB $FSTAB_BAK
+	fi
+	if $ISPBUSTER
+	then
+		echo ""
+		echo "${blue}Checking if there's a Crontab ...${std}"
+		CRONOUT=$(sudo crontab -u root -l 2>&1)
+		if [[ $CRONOUT == "no crontab for root" ]]
+		then
+			echo "There is no Crontab! Nothing to backup!"
+		else
+			echo "${blue}There is a Crontab! Creating a Backup of it ...${std}"
+			echo "${blue}Copying the Crontab to ${CRON_BAK} ...${std}"
+			sudo crontab -u root -l | sudo tee "${CRON_BAK}" 1> /dev/null
+		fi
 	fi
 	echo ""
 	echo "${blue}Backups created successfully! Continuing Installation!${std}"
@@ -1130,6 +1197,11 @@ fi
 if $EEPROM_FLASHER
 then
 	install_eeprom_flasher
+fi
+
+if $ISPBUSTER
+then
+	install_ispbuster
 fi
 
 if $PISHRINK
