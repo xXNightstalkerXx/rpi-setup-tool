@@ -65,7 +65,7 @@ set_possible_packages () {
 		RPIIMAGER=false
 		NO_WIFI=false
 		MNT_NAS=true
-		ISPBUSTER=true
+		ISPBUSTER=false
 
 	elif [[ $INSTALL_OPTIONS -eq 2 ]]
 	then
@@ -118,12 +118,12 @@ set_standard_packages () {
 		MNT_NAS=true
 		ISPBUSTER=false
 		USED_PACKAGE_ARRAY=("RPI Config" "Kali VNC" "UCTronics LCD" "Netdrive Connector" "EEPROM Flasher" "Pishrink" "Samba" "GParted" "Mount NAS")
-		UNUSED_PACKAGE_ARRAY=("ISP Buster")
 
 		#Packages that can't be installed
 		#EEPROM_UPDATE=false
 		#NO_WIFI=false
 		#RPIIMAGER=false
+		#ISPBUSTER=false
 
 	elif [[ $INSTALL_OPTIONS -eq 2 ]]
 	then
