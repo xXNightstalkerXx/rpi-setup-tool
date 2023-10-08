@@ -13,6 +13,9 @@ CONFIG_BAK="${BAK_DIR}/config_rpisetup.bak"
 FSTAB=/etc/fstab
 FSTAB_BAK="${BAK_DIR}/fstab_rpisetup.bak"
 CRON_BAK="${BAK_DIR}/crontab.bak"
+SMB=/etc/samba/smb.conf
+SMB_BAK="${BAK_DIR}/smb.bak"
+
 
 #Package Filename Declarations
 KALIVNC_FILENAME=rpi-kalivnc-autoinstaller
@@ -657,6 +660,14 @@ install_samba () {
 	echo ""
 	echo "${green}Please input a new Samba Password!${std}"
 	sudo smbpasswd -a "${USER}"
+	echo "${blue}Creating a Backup of ${SMB} ...${std}"
+	echo "${blue}Copying ${SMB} to ${SMB_BAK} ...${std}"
+	sudo cp $SMB $SMB_BAK
+	echo "${blue}Disabling NetBIOS Broadcasting on Ports 137-138 ...${std}"
+	l=$(grep -in "bind interfaces only" /etc/samba/smb.conf | awk -F: '{print $1}')
+	l=$((l+1))
+	sudo sed -i "${l}i disable netbios = yes" /etc/samba/smb.conf
+	sudo update-rc.d nmbd disable
 	echo ""
 	echo "${blue}Samba is installed and okay! Continuing Installation!${std}"
 	sleep 1
