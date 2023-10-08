@@ -15,6 +15,7 @@ FSTAB_BAK="${BAK_DIR}/fstab_rpisetup.bak"
 CRON_BAK="${BAK_DIR}/crontab.bak"
 SMB=/etc/samba/smb.conf
 SMB_BAK="${BAK_DIR}/smb.bak"
+NTP=/etc/systemd/timesyncd.conf
 
 
 #Package Filename Declarations
@@ -69,6 +70,8 @@ set_possible_packages () {
 		NO_WIFI=false
 		MNT_NAS=true
 		ISPBUSTER=false
+		SET_LOCALNTP=true
+
 
 	elif [[ $INSTALL_OPTIONS -eq 2 ]]
 	then
@@ -86,6 +89,7 @@ set_possible_packages () {
 		NO_WIFI=true
 		MNT_NAS=true
 		ISPBUSTER=true
+		SET_LOCALNTP=true
 
 	elif [[ $INSTALL_OPTIONS -eq 3 ]]
 	then
@@ -103,6 +107,7 @@ set_possible_packages () {
 		NO_WIFI=true
 		MNT_NAS=true
 		ISPBUSTER=true
+		SET_LOCALNTP=true
 	fi
 }
 
@@ -120,7 +125,8 @@ set_standard_packages () {
 		GPARTED=true
 		MNT_NAS=true
 		ISPBUSTER=false
-		USED_PACKAGE_ARRAY=("RPI Config" "Kali VNC" "UCTronics LCD" "Netdrive Connector" "EEPROM Flasher" "Pishrink" "Samba" "GParted" "Mount NAS")
+		SET_LOCALNTP=true
+		USED_PACKAGE_ARRAY=("RPI Config" "Kali VNC" "UCTronics LCD" "Netdrive Connector" "EEPROM Flasher" "Pishrink" "Samba" "GParted" "Mount NAS" "Local NTP")
 
 		#Packages that can't be installed
 		#EEPROM_UPDATE=false
@@ -139,7 +145,8 @@ set_standard_packages () {
 		NO_WIFI=true
 		MNT_NAS=false
 		ISPBUSTER=false
-		USED_PACKAGE_ARRAY=("Update EEPROM" "UCTronics LCD" "Netdrive Connector" "Pishrink" "Samba" "Disable WIFI")
+		SET_LOCALNTP=true
+		USED_PACKAGE_ARRAY=("Update EEPROM" "UCTronics LCD" "Netdrive Connector" "Pishrink" "Samba" "Disable WIFI" "Local NTP")
 		UNUSED_PACKAGE_ARRAY=("Mount NAS" "ISP Buster")
 
 		#Packages that can't be installed
@@ -162,7 +169,8 @@ set_standard_packages () {
 		NO_WIFI=true
 		MNT_NAS=true
 		ISPBUSTER=false
-		USED_PACKAGE_ARRAY=("Update EEPROM" "UCTronics LCD" "Netdrive Connector" "Pishrink" "Samba" "GParted" "RPI Imager" "Disable WIFI" "Mount NAS")
+		SET_LOCALNTP=true
+		USED_PACKAGE_ARRAY=("Update EEPROM" "UCTronics LCD" "Netdrive Connector" "Pishrink" "Samba" "GParted" "RPI Imager" "Disable WIFI" "Mount NAS" "Local NTP")
 		UNUSED_PACKAGE_ARRAY=("ISP Buster")
 
 		#Packages that can't be installed
@@ -475,6 +483,32 @@ select_custom_packages () {
 			UNUSED_PACKAGE_ARRAY+=("Mount NAS")
 		fi
 	fi
+
+	if $SET_LOCALNTP
+	then
+		echo ""
+		echo "${green}Fetch systemtime from a Local NTP Server?${std}"
+		echo ""
+		echo "${green}If your Firewall blocks vulnerable NTP Packets to the Internet${std}"
+		echo "${green}this machine won't be able to get the correct systemtime!${std}"
+		read -r -p "Yes (y)/ No (n): " n;
+
+		while ! [[ "$n" =~ ^(y|n)$ ]];
+		do
+			echo ""
+			echo "${red}Wrong Input! Please type 'y' for 'YES' or 'n' for 'NO'!${std}"
+			read -r -p "Yes (y)/ No (n): " n;
+		done
+
+		if [[ "$n" =~ ^(y)$ ]];
+		then
+			SET_LOCALNTP=true
+			USED_PACKAGE_ARRAY+=("Local NTP")
+		else
+			SET_LOCALNTP=false
+			UNUSED_PACKAGE_ARRAY+=("Local NTP")
+		fi
+	fi
 }
 
 show_packages_to_install () {
@@ -664,7 +698,7 @@ install_samba () {
 	echo "${blue}Copying ${SMB} to ${SMB_BAK} ...${std}"
 	sudo cp $SMB $SMB_BAK
 	echo "${blue}Disabling NetBIOS Broadcasting on Ports 137-138 ...${std}"
-	l=$(grep -in "bind interfaces only" /etc/samba/smb.conf | awk -F: '{print $1}')
+	l=$(grep -in "bind interfaces only" ${SMB} | awk -F: '{print $1}')
 	l=$((l+1))
 	sudo sed -i "${l}i disable netbios = yes" /etc/samba/smb.conf
 	sudo update-rc.d nmbd disable
@@ -730,6 +764,117 @@ install_no_wifi () {
 	echo ""
 	echo "${blue}Successfully disabled Bluetooth and WIFI! Continuing the Installation!${std}"
 	sleep 1
+}
+
+install_local_ntp () {
+	echo ""
+	echo ""
+	echo "${green}Do you want to set the NTP Server IP manually or setup the Default Gateway?${std}"
+	echo ""
+	echo "1. Set IP to NTP Server manually"
+	echo "2. Fetch IP of the default Gateway"
+	echo ""
+	read -r -p "${green}Enter a Number for an Option: ${std}" n
+
+	while [[ $n -lt 1 || $n -gt 2 ]]
+	do
+		echo ""
+		echo "${red}Wrong Input! Please Select a Number for an Option!${std}"
+		read -r -p "Enter a Number for an Option: " n;
+	done
+
+	if [[ $n -eq 1 ]]
+	then
+		echo ""
+		read -r -p "${green}Enter the IP of the NTP Server: ${std}" ip_adress;
+		echo "${blue}Checking if the Host is reachable...${std}"
+
+		if ping -c 1 "$ip_adress" &> /dev/null
+		then
+			echo "${blue}The Host is reachable!${std}"
+			i=1
+		else
+			i=0
+		fi
+
+		while [[ $i -eq 0 ]]
+		do
+			echo ""
+			echo "${red}The Host is not reachable! Please try a different IP!${std}"
+			read -r -p "Enter the IP of the NTP Server: " ip_adress;
+			echo ""
+			echo "${blue}Checking if the Host is reachable...${std}"
+
+			if ping -c 1 "$ip_adress" &> /dev/null
+			then
+				echo "${blue}The Host is reachable!${std}"
+				i=1
+			else
+				i=0
+			fi
+		done
+
+		echo "${blue}Setting up the NTP Server within ${NTP} ...${std}"
+		sudo sed -i "s/^#NTP=*/NTP=${ip_adress}/" $NTP
+		sudo sed -i "s/^NTP=*/NTP=${ip_adress}/" $NTP
+		sudo sed -i "s/^#FallbackNTP=*/FallbackNTP=0.debian.pool.ntp.org 1.debian.pool.ntp.org 2.debian.pool.ntp.org 3.debian.pool.ntp.org/" $NTP
+		sudo sed -i "s/^FallbackNTP=*/FallbackNTP=0.debian.pool.ntp.org 1.debian.pool.ntp.org 2.debian.pool.ntp.org 3.debian.pool.ntp.org/" $NTP
+		sudo systemctl restart systemd-timesyncd.service
+	else
+		echo ""
+		echo "${blue}Getting the default Gateway...${std}"
+		default_gateway=$(/sbin/ip route | awk '/default/ { print $3 }')
+		echo "$default_gateway"
+		echo "${blue}Checking if the default Gateway is reachable...${std}"
+		if ping -c 1 "$default_gateway" &> /dev/null
+		then
+			echo "${blue}Setting up the NTP Server within ${NTP} ...${std}"
+			sudo sed -i "s/^#NTP=*/NTP=${default_gateway}/" $NTP
+			sudo sed -i "s/^NTP=*/NTP=${default_gateway}/" $NTP
+			sudo sed -i "s/^#FallbackNTP=*/FallbackNTP=0.debian.pool.ntp.org 1.debian.pool.ntp.org 2.debian.pool.ntp.org 3.debian.pool.ntp.org/" $NTP
+			sudo sed -i "s/^FallbackNTP=*/FallbackNTP=0.debian.pool.ntp.org 1.debian.pool.ntp.org 2.debian.pool.ntp.org 3.debian.pool.ntp.org/" $NTP
+			sudo systemctl restart systemd-timesyncd.service
+		else
+			echo "${red}Default Gateway is not reachable! Please enter the IP of the NTP Server manually!${std}"
+			echo ""
+			read -r -p "${green}Enter the IP of the NTP Server: ${std}" ip_adress;
+			echo "${blue}Checking if the Host is reachable...${std}"
+
+			if ping -c 1 "$ip_adress" &> /dev/null
+			then
+				echo "${blue}The Host is reachable!${std}"
+				i=1
+			else
+				i=0
+			fi
+
+			while [[ $i -eq 0 ]]
+			do
+				echo ""
+				echo "${red}The Host is not reachable! Please try a different IP!${std}"
+				read -r -p "Enter the IP of the NTP Server: " ip_adress;
+				echo ""
+				echo "${blue}Checking if the Host is reachable...${std}"
+
+				if ping -c 1 "$ip_adress" &> /dev/null
+				then
+					echo "${blue}The Host is reachable!${std}"
+					i=1
+				else
+					i=0
+				fi
+			done
+
+			echo "${blue}Setting up the NTP Server within ${NTP} ...${std}"
+			sudo sed -i "s/^#NTP=*/NTP=${ip_adress}/" $NTP
+			sudo sed -i "s/^NTP=*/NTP=${ip_adress}/" $NTP
+			sudo sed -i "s/^#FallbackNTP=*/FallbackNTP=0.debian.pool.ntp.org 1.debian.pool.ntp.org 2.debian.pool.ntp.org 3.debian.pool.ntp.org/" $NTP
+			sudo sed -i "s/^FallbackNTP=*/FallbackNTP=0.debian.pool.ntp.org 1.debian.pool.ntp.org 2.debian.pool.ntp.org 3.debian.pool.ntp.org/" $NTP
+			sudo systemctl restart systemd-timesyncd.service
+		fi
+	fi
+	echo ""
+	echo "${blue}Local NTP Server is setup successfully! Continuing the Installation!${std}"
 }
 
 install_mnt_nas () {
@@ -1238,6 +1383,11 @@ fi
 if $NO_WIFI
 then
 	install_no_wifi
+fi
+
+if $SET_LOCALNTP
+then
+	install_local_ntp
 fi
 
 if $MNT_NAS
