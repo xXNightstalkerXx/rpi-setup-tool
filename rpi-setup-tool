@@ -1378,11 +1378,6 @@ then
 	install_no_wifi
 fi
 
-if $SET_LOCALNTP
-then
-	install_local_ntp
-fi
-
 if $MNT_NAS
 then
 	install_mnt_nas
