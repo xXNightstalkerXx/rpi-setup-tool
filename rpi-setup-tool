@@ -36,6 +36,7 @@ WGET_NETDRIVE="https://raw.githubusercontent.com/xXNightstalkerXx/netdrive-conne
 WGET_PISHRINK="https://raw.githubusercontent.com/Drewsif/PiShrink/master/${PISHRINK_FILENAME_LONG}"
 
 #Color Declarations
+del="\033[K2\r"
 std=$(tput setaf 15)
 red=$(tput setaf 9 bold)
 green=$(tput setaf 10 bold)
@@ -68,28 +69,27 @@ check_clocksync () {
 
 check_clocksync_verbose () {
 	echo "${blue}Checking Sync Status of the Systemclock, this could take up to 2 minutes!${std}"
-	echo "${blue}Checking Sync Status of the Systemclock${std}"
 	timeout=240
 	counter=1
-	while [[ $SYNC -eq 0 || $timeout -ne 0 ]]
+	while [[ $SYNC -eq 0 && $timeout -gt 0 ]]
 	do
 		if [[ $counter -eq 1 ]]
 		then
-			echo -ne "${blue}Checking Sync Status of the Systemclock.${std}\r"
+			echo -ne "${del}${blue}Checking Sync Status of the Systemclock.${std}"
 		elif [[ $counter -eq 2 ]]
 		then
-			echo -ne "${blue}Checking Sync Status of the Systemclock..${std}\r"
+			echo -ne "${del}${blue}Checking Sync Status of the Systemclock..${std}"
 		elif [[ $counter -eq 3 ]]
 		then
-			echo -ne "${blue}Checking Sync Status of the Systemclock...${std}\r"
-			counter=1
+			echo -ne "${del}${blue}Checking Sync Status of the Systemclock...${std}"
+			counter=0
 		fi
 		check_clocksync
-		counter=$($counter + 1)
-		timeout=$($timeout - 1)
+		counter=$((counter+1))
+		timeout=$((timeout-1))
 		sleep 0.5
 	done
-	echo -ne "${blue}Checking Sync Status of the Systemclock...${std}\r"
+	echo -e "${del}${blue}Checking Sync Status of the Systemclock...${std}"
 	echo "${blue}Check finished!${std}"
 	echo ""
 	if [[ $SYNC -eq 1 ]]
