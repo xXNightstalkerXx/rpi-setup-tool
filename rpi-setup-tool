@@ -96,7 +96,7 @@ check_clocksync_verbose () {
 	then
 		echo "${green}The Systemclock is synchronized!${std}"
 	else
-		if [[ $SYNC -eq 2 ]]
+		if [[ $SYNC -eq 0 ]]
 		then
 			echo "${red}Couldn't synchronize the Systemclock!${std}"
 			echo "${red}Exiting Script now!${std}"
@@ -1008,7 +1008,7 @@ if [[ $SYNC -eq 1 ]]
 then
 	echo "${green}The Systemclock is synchronized!${std}"
 else
-	if [[ $SYNC -eq 2 ]]
+	if [[ $SYNC -eq 0 ]]
 	then
 		echo "${red}Couldn't synchronize the Systemclock!${std}"
 		echo ""
