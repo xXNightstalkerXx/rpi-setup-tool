@@ -1006,6 +1006,8 @@ check_clocksync
 if [[ $SYNC -eq 1 ]]
 then
 	echo "${green}The Systemclock is synchronized!${std}"
+	echo ""
+	echo "${blue}Systemclock is now in Sync! Continuing the Installation!${std}"
 else
 	if [[ $SYNC -eq 0 ]]
 	then
