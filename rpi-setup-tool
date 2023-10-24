@@ -17,7 +17,6 @@ SMB=/etc/samba/smb.conf
 SMB_BAK="${BAK_DIR}/smb.bak"
 NTP=/etc/systemd/timesyncd.conf
 
-
 #Package Filename Declarations
 KALIVNC_FILENAME=rpi-kalivnc-autoinstaller
 EEPROM_FILENAME=rpi-eeprom-autoinstaller
