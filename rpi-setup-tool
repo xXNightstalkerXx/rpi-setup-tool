@@ -73,13 +73,13 @@ check_clocksync_verbose () {
 	counter=1
 	while [[ $SYNC -eq 0 || $timeout -ne 0 ]]
 	do
-		if [[ $counter == 1 ]]
+		if [[ $counter -eq 1 ]]
 		then
 			echo -ne "${blue}Checking Sync Status of the Systemclock.${std}\r"
-		elif [[ $counter == 2 ]]
+		elif [[ $counter -eq 2 ]]
 		then
 			echo -ne "${blue}Checking Sync Status of the Systemclock..${std}\r"
-		elif [[ $counter == 3 ]]
+		elif [[ $counter -eq 3 ]]
 		then
 			echo -ne "${blue}Checking Sync Status of the Systemclock...${std}\r"
 			counter=1
@@ -92,11 +92,11 @@ check_clocksync_verbose () {
 	echo -ne "${blue}Checking Sync Status of the Systemclock...${std}\r"
 	echo "${blue}Check finished!${std}"
 	echo ""
-	if [[ $SYNC == 1 ]]
+	if [[ $SYNC -eq 1 ]]
 	then
 		echo "${green}The Systemclock is synchronized!${std}"
 	else
-		if [[ $SYNC == 2 ]]
+		if [[ $SYNC -eq 2 ]]
 		then
 			echo "${red}Couldn't synchronize the Systemclock!${std}"
 			echo "${red}Exiting Script now!${std}"
@@ -1004,11 +1004,11 @@ echo ""
 echo "${blue}Checking Systemclock Sync Status...${std}"
 echo ""
 check_clocksync
-if [[ $SYNC == 1 ]]
+if [[ $SYNC -eq 1 ]]
 then
 	echo "${green}The Systemclock is synchronized!${std}"
 else
-	if [[ $SYNC == 2 ]]
+	if [[ $SYNC -eq 2 ]]
 	then
 		echo "${red}Couldn't synchronize the Systemclock!${std}"
 		echo ""
