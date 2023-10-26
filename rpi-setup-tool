@@ -31,7 +31,7 @@ WGET_KALIVNC="https://raw.githubusercontent.com/xXNightstalkerXx/rpi-kalivnc-ins
 WGET_EEPROM="https://raw.githubusercontent.com/xXNightstalkerXx/rpi-eeprom-flasher/Debian_Bullseye/${EEPROM_FILENAME}"
 WGET_UCLCD="https://raw.githubusercontent.com/xXNightstalkerXx/uctronics-lcd-installer/Debian_Bullseye/${UCLCD_FILENAME}"
 WGET_ISPBUSTER="https://raw.githubusercontent.com/xXNightstalkerXx/isp-buster/Debian_Bullseye/${ISPBUSTER_FILENAME}"
-WGET_NETDRIVE="https://raw.githubusercontent.com/xXNightstalkerXx/netdrive-connector/Debian_Bullseye/${NETDRIVE_FILENAME}"
+WGET_NETDRIVE="https://raw.githubusercontent.com/xXNightstalkerXx/netdrive-connector/master/${NETDRIVE_FILENAME}"
 WGET_PISHRINK="https://raw.githubusercontent.com/Drewsif/PiShrink/master/${PISHRINK_FILENAME_LONG}"
 
 #Color Declarations
