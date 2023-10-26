@@ -1,4 +1,4 @@
-# DEPRECIATED (Debian Bullseye)
+## DEPRECIATED (Debian Bullseye)
 # rpi-setup-tool
 This Installer guides you through the Installation of some standard packages I created and
 makes the Setup of a Pi in General easier and faster.
