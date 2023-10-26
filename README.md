@@ -1,3 +1,4 @@
+# DEPRECIATED (Debian Bullseye)
 # rpi-setup-tool
 This Installer guides you through the Installation of some standard packages I created and
 makes the Setup of a Pi in General easier and faster.
@@ -12,7 +13,7 @@ Also feel free to contribute to this Repository and make it better :)
 # INSTALLATION
 
 
-    wget https://raw.githubusercontent.com/xXNightstalkerXx/rpi-setup-tool/master/rpi-setup-tool
+    wget https://raw.githubusercontent.com/xXNightstalkerXx/rpi-setup-tool/Debian_Bullseye/rpi-setup-tool
 Download the Setup Tool Script with wget
 
     sudo chmod 0755 rpi-setup-tool
