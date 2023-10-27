@@ -880,6 +880,7 @@ install_mnt_nas () {
 	echo "$username"
 	echo ""
 	read -r -s -p "${green}Enter the Password of the User: ${std}" password;
+	echo ""
 	echo "${blue}The Password is:${std}"
 	echo "TOPSECRECT"
 	echo ""
