@@ -18,6 +18,7 @@ SMB_BAK="${BAK_DIR}/smb.bak"
 NTP=/etc/systemd/timesyncd.conf
 
 #Package Filename Declarations
+OSCHECK_FILENAME=os-check
 KALIVNC_FILENAME=rpi-kalivnc-autoinstaller
 EEPROM_FILENAME=rpi-eeprom-autoinstaller
 UCLCD_FILENAME=uctronics-lcd-autoinstaller
@@ -27,6 +28,7 @@ PISHRINK_FILENAME_LONG=pishrink.sh
 PISHRINK_FILENAME_SHORT=pishrink
 
 #WGET URL Declarations
+WGET_OSCHECK="https://raw.githubusercontent.com/xXNightstalkerXx/rpi-setup-tool/master/${OSCHECK_FILENAME}"
 WGET_KALIVNC="https://raw.githubusercontent.com/xXNightstalkerXx/rpi-kalivnc-installer/master/${KALIVNC_FILENAME}"
 WGET_EEPROM="https://raw.githubusercontent.com/xXNightstalkerXx/rpi-eeprom-flasher/master/${EEPROM_FILENAME}"
 WGET_UCLCD="https://raw.githubusercontent.com/xXNightstalkerXx/uctronics-lcd-installer/master/${UCLCD_FILENAME}"
@@ -603,6 +605,12 @@ show_packages_to_install () {
 	fi
 }
 
+install_os_check () {
+	sudo wget $WGET_OSCHECK 1> /dev/null
+	sudo chmod 0755 $OSCHECK_FILENAME
+	sudo mv "$OSCHECK_FILENAME" "$SCRIPTS_DIR/$OSCHECK_FILENAME"
+}
+
 install_eeprom_update () {
 	echo ""
 	echo ""
@@ -953,6 +961,7 @@ echo "${blue}//     \\\     //            //      ///////////   ///////////     
 echo "RPI Setup Tool by Nightstalker"
 echo ""
 echo ""
+install_os_check
 echo "${blue}Checking OS...${std}"
 os_type="$(grep -E '^(NAME)=' /etc/os-release)"
 os_type=${os_type#*=}
